@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This file is the operating guide for Codex, Claude and human developers. Treat this project as production software: real users, real data, real money, real mistakes and real growth.
+This file is the operating guide for Opencode, Codex, Claude and human developers. Treat this project as production software: real users, real data, real money, real mistakes and real growth.
 
 PlayingKeys is a piano learning platform with a React Native Expo mobile app, NestJS backend API, PostgreSQL database, and an admin dashboard for managing lessons, teachers, students, and payments.
 

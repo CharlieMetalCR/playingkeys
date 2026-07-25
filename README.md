@@ -6,7 +6,7 @@ A piano learning platform built with React Native Expo, NestJS, and PostgreSQL.
 
 PlayingKeys is a mobile-first application for learning piano, featuring:
 - Interactive piano keyboard with accurate sound
-- Structured lessons based on "The Music Tree - Time to Begin" curriculum
+- Structured lessons with customizable curriculum
 - Progress tracking for students
 - Teacher dashboard for managing students and assignments
 - Admin dashboard for platform management
@@ -116,20 +116,13 @@ npm run test
 npm run build
 ```
 
-## Curriculum
+## Features
 
-Based on "The Music Tree - Time to Begin" by Frances Clark, Louise Goss, and Sam Holland.
-
-### Units
-1. **Unit 1**: Higher/Lower, Quarter/Half notes
-2. **Unit 2**: Piano (p), Forte (f), Repeated notes
-3. **Unit 3**: Slurs, Octave signs
-4. **Unit 4**: 2nds (intervals), White keys
-5. **Unit 5**: 3rds (intervals)
-6. **Unit 6**: Time signatures
-7. **Unit 7**: 4ths (intervals)
-8. **Unit 8**: Whole notes, 5ths (intervals)
-9. **Unit 9**: F Clef/Bass Staff, G Clef/Treble Staff, Grand Staff
+- Interactive piano keyboard with accurate sound
+- Customizable lessons and units
+- Progress tracking for students
+- Teacher dashboard for managing students and assignments
+- Admin dashboard for platform management
 
 ## License
 
