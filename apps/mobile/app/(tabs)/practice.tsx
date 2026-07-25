@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Minus, Plus, Metronome, CheckCircle, XCircle, Zap } from 'lucide-react-native';
+import { Minus, Plus, Activity, CheckCircle, XCircle, Zap, Clock, Target } from 'lucide-react-native';
 import { usePianoAudio } from '../../hooks/usePianoAudio';
 
 const ALL_NOTES: { note: string; freq: number; isBlack: boolean }[] = [
@@ -118,7 +118,7 @@ export default function PracticeScreen() {
             style={[styles.metroBtn, metronomeOn && styles.metroBtnActive]}
             onPress={() => setMetronomeOn((m) => !m)}
           >
-            <Metronome size={18} color={metronomeOn ? '#C4B5FD' : '#6B7686'} />
+            <Activity size={18} color={metronomeOn ? '#C4B5FD' : '#6B7686'} />
           </Pressable>
         </View>
       </View>
@@ -148,8 +148,8 @@ export default function PracticeScreen() {
             ))}
           </View>
           <View style={styles.monitorMeta}>
-            <Text style={styles.monitorMetaText}>⏱ {formatTime(practiceSeconds)}</Text>
-            <Text style={styles.monitorMetaText}>🎯 {accuracy}%</Text>
+            <Text style={styles.monitorMetaText}>{formatTime(practiceSeconds)}</Text>
+            <Text style={styles.monitorMetaText}>{accuracy}% accuracy</Text>
           </View>
         </View>
       </View>
