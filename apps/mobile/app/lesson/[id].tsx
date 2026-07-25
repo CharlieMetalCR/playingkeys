@@ -1,110 +1,155 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Play, CheckCircle } from 'lucide-react-native';
-import { useState, useCallback } from 'react';
+import { ArrowLeft, Play, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { fetchLesson, ApiLesson } from '../../lib/api';
 
-const LESSONS: Record<string, { title: string; unit: string; instructions: string; notes: string[] }> = {
-  '1': {
-    title: 'Take Off',
-    unit: 'Unit 1: Higher & Lower',
-    instructions: 'Play all pieces on groups of 2 black keys using your pointer fingers. When notes look higher, they sound higher and you play up the keyboard.',
-    notes: ['C#4', 'D#4', 'F#4', 'G#4', 'A#4'],
-  },
-  '2': {
-    title: 'Landing',
-    unit: 'Unit 1: Higher & Lower',
-    instructions: 'Like Take Off but in reverse. When notes look lower, they sound lower and you play down the keyboard to the left.',
-    notes: ['A#4', 'G#4', 'F#4', 'D#4', 'C#4'],
-  },
-  '3': {
-    title: 'In a Canoe',
-    unit: 'Unit 1: Higher & Lower',
-    instructions: 'Like Landing but uses quarter notes (short) and half notes (long). Each group ends with a half note.',
-    notes: ['D#4', 'C#4', 'D#4', 'C#4', 'D#4'],
-  },
-  '4': {
-    title: 'Space Ship',
-    unit: 'Unit 1: Higher & Lower',
-    instructions: 'Similar to In a Canoe but the groups are higher on the keyboard.',
-    notes: ['G#4', 'F#4', 'G#4', 'F#4', 'G#4'],
-  },
-  '5': {
-    title: 'A Secret',
-    unit: 'Unit 2: Dynamics',
-    instructions: 'Play softly (piano). Use a gentle touch on the 3 black keys. The whole piece should sound soft.',
-    notes: ['C#4', 'D#4', 'F#4'],
-  },
-  '6': {
-    title: 'Rock Band',
-    unit: 'Unit 2: Dynamics',
-    instructions: 'Play loudly (forte). Use strong finger pressure. The whole piece should sound loud and energetic.',
-    notes: ['F#4', 'G#4', 'A#4'],
-  },
-};
+const NOTES_FULL: { note: string; freq: number; isBlack: boolean }[] = [
+  { note: 'C4', freq: 261.63, isBlack: false },
+  { note: 'C#4', freq: 277.18, isBlack: true },
+  { note: 'D4', freq: 293.66, isBlack: false },
+  { note: 'D#4', freq: 311.13, isBlack: true },
+  { note: 'E4', freq: 329.63, isBlack: false },
+  { note: 'F4', freq: 349.23, isBlack: false },
+  { note: 'F#4', freq: 369.99, isBlack: true },
+  { note: 'G4', freq: 392.0, isBlack: false },
+  { note: 'G#4', freq: 415.3, isBlack: true },
+  { note: 'A4', freq: 440.0, isBlack: false },
+  { note: 'A#4', freq: 466.16, isBlack: true },
+  { note: 'B4', freq: 493.88, isBlack: false },
+];
 
 export default function LessonDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [completed, setCompleted] = useState(false);
+  const [lesson, setLesson] = useState<ApiLesson | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const lesson = LESSONS[id || '1'] || LESSONS['1'];
+  const load = useCallback(async () => {
+    if (!id) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchLesson(id);
+      setLesson(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load lesson');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => { load(); }, [load]);
 
   const handleComplete = useCallback(() => {
     setCompleted(true);
   }, []);
 
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#7C3AED" />
+        <Text style={styles.loadingText}>Cargando lección...</Text>
+      </View>
+    );
+  }
+
+  if (error || !lesson) {
+    return (
+      <View style={styles.center}>
+        <AlertCircle size={40} color="#EF4444" />
+        <Text style={styles.errorText}>{error ?? 'Lección no encontrada'}</Text>
+        <Pressable style={styles.retryBtn} onPress={load}>
+          <RefreshCw size={16} color="#fff" />
+          <Text style={styles.retryText}>Reintentar</Text>
+        </Pressable>
+        <Pressable style={[styles.retryBtn, { backgroundColor: '#273244', marginTop: 8 }]} onPress={() => router.back()}>
+          <Text style={styles.retryText}>Volver</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const unitLabel = lesson.unit
+    ? `Unidad ${lesson.unit.number}: ${lesson.unit.title}`
+    : `Lección ${lesson.number}`;
+  const instructions = lesson.content.instructions ?? lesson.content.description ?? '';
+
   return (
     <ScrollView style={styles.container}>
       <Pressable style={styles.backButton} onPress={() => router.back()}>
-        <ArrowLeft size={20} color="#3b82f6" />
-        <Text style={styles.backText}>Back</Text>
+        <ArrowLeft size={20} color="#C4B5FD" />
+        <Text style={styles.backText}>Volver</Text>
       </Pressable>
 
       <View style={styles.header}>
-        <Text style={styles.unitLabel}>{lesson.unit}</Text>
+        <Text style={styles.unitLabel}>{unitLabel}</Text>
         <Text style={styles.title}>{lesson.title}</Text>
+        <Text style={styles.difficultyLabel}>
+          {'★'.repeat(lesson.difficulty)}{'☆'.repeat(Math.max(0, 3 - lesson.difficulty))}
+        </Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Instructions</Text>
-        <Text style={styles.instructions}>{lesson.instructions}</Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Notes to Practice</Text>
-        <View style={styles.notesRow}>
-          {lesson.notes.map((note) => (
-            <View key={note} style={styles.noteChip}>
-              <Text style={styles.noteText}>{note}</Text>
-            </View>
-          ))}
+      {instructions ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Instrucciones</Text>
+          <Text style={styles.instructions}>{instructions}</Text>
         </View>
-      </View>
+      ) : null}
+
+      {lesson.content.keySignature ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Armagura</Text>
+          <View style={styles.chip}>
+            <Text style={styles.chipText}>{lesson.content.keySignature}</Text>
+          </View>
+        </View>
+      ) : null}
+
+      {lesson.content.fingering ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Digitación</Text>
+          <View style={styles.chip}>
+            <Text style={styles.chipText}>{lesson.content.fingering}</Text>
+          </View>
+        </View>
+      ) : null}
+
+      {lesson.content.dynamics ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Dinámica</Text>
+          <View style={styles.chip}>
+            <Text style={styles.chipText}>{lesson.content.dynamics}</Text>
+          </View>
+        </View>
+      ) : null}
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Practice Piano</Text>
+        <Text style={styles.sectionTitle}>Piano de práctica</Text>
         <View style={styles.pianoMini}>
-          {['C', 'D', 'E', 'F', 'G', 'A', 'B'].map((n) => (
-            <View key={n} style={styles.miniWhiteKey}>
-              <Text style={styles.miniKeyLabel}>{n}</Text>
+          {NOTES_FULL.filter((n) => !n.isBlack).map((n) => (
+            <View key={n.note} style={styles.miniWhiteKey}>
+              <Text style={styles.miniKeyLabel}>{n.note.replace('4', '').replace('5', '')}</Text>
             </View>
           ))}
         </View>
       </View>
 
       <Pressable
-        style={[styles.completeButton, completed && styles.completeButtonDone]}
+        style={[styles.completeBtn, completed && styles.completeBtnDone]}
         onPress={handleComplete}
       >
         {completed ? (
           <>
-            <CheckCircle size={20} color="#ffffff" />
-            <Text style={styles.completeText}>Completed!</Text>
+            <CheckCircle size={20} color="#fff" />
+            <Text style={styles.completeText}>¡Completada!</Text>
           </>
         ) : (
           <>
-            <Play size={20} color="#ffffff" />
-            <Text style={styles.completeText}>Mark as Complete</Text>
+            <Play size={20} color="#fff" />
+            <Text style={styles.completeText}>Marcar como completada</Text>
           </>
         )}
       </Pressable>
@@ -113,71 +158,55 @@ export default function LessonDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    gap: 4,
+  container: { flex: 1, backgroundColor: '#0B0F17' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0B0F17', padding: 32 },
+  loadingText: { marginTop: 12, fontSize: 14, color: '#9CA3AF' },
+  errorText: { marginTop: 12, fontSize: 16, color: '#EF4444', textAlign: 'center' },
+  retryBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    marginTop: 16, backgroundColor: '#7C3AED', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12,
   },
-  backText: { fontSize: 16, color: '#3b82f6' },
+  retryText: { color: '#fff', fontWeight: '600' },
+
+  backButton: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 4 },
+  backText: { fontSize: 16, color: '#C4B5FD' },
   header: { padding: 16, paddingBottom: 8 },
   unitLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#3b82f6',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    fontSize: 12, fontWeight: '600', color: '#C4B5FD',
+    textTransform: 'uppercase', letterSpacing: 1,
   },
-  title: { fontSize: 28, fontWeight: '700', color: '#1e293b', marginTop: 4 },
+  title: { fontSize: 28, fontWeight: '700', color: '#F9FAFB', marginTop: 4 },
+  difficultyLabel: { fontSize: 14, color: '#FBBF24', marginTop: 4 },
+
   section: { padding: 16 },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 8,
+    fontSize: 13, fontWeight: '700', color: '#9CA3AF',
+    textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8,
   },
-  instructions: { fontSize: 16, color: '#334155', lineHeight: 24 },
-  notesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  noteChip: {
-    backgroundColor: '#eff6ff',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: '#bfdbfe',
+  instructions: { fontSize: 15, color: '#F9FAFB', lineHeight: 24 },
+  chip: {
+    backgroundColor: 'rgba(124,58,237,.16)', borderRadius: 10,
+    paddingHorizontal: 16, paddingVertical: 8, alignSelf: 'flex-start',
   },
-  noteText: { fontSize: 16, fontWeight: '600', color: '#3b82f6' },
+  chipText: { fontSize: 14, fontWeight: '600', color: '#C4B5FD' },
+
   pianoMini: {
-    flexDirection: 'row',
-    backgroundColor: '#1e293b',
-    borderRadius: 8,
-    padding: 8,
-    justifyContent: 'center',
+    flexDirection: 'row', backgroundColor: '#0E1524',
+    borderWidth: 1, borderColor: '#273244',
+    borderRadius: 12, padding: 8, justifyContent: 'center',
   },
   miniWhiteKey: {
-    width: 38,
-    height: 120,
-    backgroundColor: '#ffffff',
-    borderRadius: '0 0 3 3',
-    marginHorizontal: 2,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 6,
+    width: 38, height: 120, backgroundColor: '#F4F5F8',
+    borderRadius: '0 0 6 6', marginHorizontal: 2,
+    justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 6,
   },
-  miniKeyLabel: { fontSize: 10, color: '#94a3b8' },
-  completeButton: {
-    flexDirection: 'row',
-    backgroundColor: '#3b82f6',
-    borderRadius: 12,
-    padding: 16,
-    margin: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
+  miniKeyLabel: { fontSize: 10, color: '#6B7280' },
+
+  completeBtn: {
+    flexDirection: 'row', backgroundColor: '#7C3AED',
+    borderRadius: 16, padding: 16, margin: 16, marginBottom: 40,
+    justifyContent: 'center', alignItems: 'center', gap: 8,
   },
-  completeButtonDone: { backgroundColor: '#10b981' },
-  completeText: { fontSize: 16, fontWeight: '600', color: '#ffffff' },
+  completeBtnDone: { backgroundColor: '#22C55E' },
+  completeText: { fontSize: 16, fontWeight: '600', color: '#fff' },
 });

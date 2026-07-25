@@ -1,47 +1,67 @@
 import { Tabs } from 'expo-router';
-import { Music, BookOpen, User } from 'lucide-react-native';
+import { LayoutGrid, Piano, LibraryBig, ChartNoAxesCombined, User } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#3b82f6',
-        tabBarInactiveTintColor: '#94a3b8',
+        tabBarActiveTintColor: '#C4B5FD',
+        tabBarInactiveTintColor: '#6B7686',
         tabBarStyle: {
-          backgroundColor: '#ffffff',
-          borderTopColor: '#e2e8f0',
+          backgroundColor: '#111827',
+          borderTopColor: '#273244',
+          borderTopWidth: 1,
           paddingBottom: 8,
           paddingTop: 8,
           height: 60,
         },
-        headerStyle: {
-          backgroundColor: '#ffffff',
-        },
-        headerTintColor: '#1e293b',
-        headerTitleStyle: {
+        tabBarLabelStyle: {
+          fontSize: 11,
           fontWeight: '600',
         },
+        headerStyle: {
+          backgroundColor: '#0B0F17',
+        },
+        headerTintColor: '#F9FAFB',
+        headerTitleStyle: {
+          fontWeight: '700',
+        },
+        headerShadowVisible: false,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => <Music size={size} color={color} />,
+          title: 'Inicio',
+          tabBarIcon: ({ color, size }) => <LayoutGrid size={size} color={color} />,
           headerTitle: 'PlayingKeys',
         }}
       />
       <Tabs.Screen
-        name="lessons"
+        name="practice"
         options={{
-          title: 'Lessons',
-          tabBarIcon: ({ color, size }) => <BookOpen size={size} color={color} />,
+          title: 'Práctica',
+          tabBarIcon: ({ color, size }) => <Piano size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="courses"
+        options={{
+          title: 'Cursos',
+          tabBarIcon: ({ color, size }) => <LibraryBig size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="progress"
+        options={{
+          title: 'Progreso',
+          tabBarIcon: ({ color, size }) => <ChartNoAxesCombined size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: 'Perfil',
           tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />

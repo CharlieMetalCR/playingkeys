@@ -1,4 +1,5 @@
-import { IsString, IsNumber, IsBoolean, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsNumber, IsBoolean, IsOptional } from 'class-validator';
+import { Prisma } from '@prisma/client';
 
 export class UpdateLessonDto {
   @IsString()
@@ -13,9 +14,7 @@ export class UpdateLessonDto {
   @IsOptional()
   title?: string;
 
-  @IsObject()
-  @IsOptional()
-  content?: Record<string, unknown>;
+  content?: Prisma.InputJsonValue;
 
   @IsNumber()
   @IsOptional()

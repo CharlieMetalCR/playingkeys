@@ -1,89 +1,119 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { User, CreditCard, Settings, LogOut, ChevronRight } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { User, Settings, CreditCard, LogOut, ChevronRight, Bell, HelpCircle, Shield } from 'lucide-react-native';
 
 export default function ProfileScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.avatarSection}>
         <View style={styles.avatar}>
-          <User size={40} color="#3b82f6" />
+          <Text style={styles.avatarText}>C</Text>
         </View>
-        <Text style={styles.name}>Student</Text>
-        <Text style={styles.email}>student@playingkeys.com</Text>
+        <Text style={styles.name}>Carlos</Text>
+        <Text style={styles.email}>carlos@playingkeys.com</Text>
+        <View style={styles.planBadge}>
+          <Text style={styles.planText}>Plan Premium</Text>
+        </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Account</Text>
+        <Text style={styles.sectionTitle}>CUENTA</Text>
         <View style={styles.menuItem}>
-          <Settings size={20} color="#64748b" />
-          <Text style={styles.menuLabel}>Settings</Text>
-          <ChevronRight size={16} color="#cbd5e1" />
-        </View>
-        <View style={styles.menuItem}>
-          <CreditCard size={20} color="#64748b" />
-          <Text style={styles.menuLabel}>Membership</Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>Active</Text>
+          <View style={[styles.menuIcon, { backgroundColor: 'rgba(124,58,237,.16)' }]}>
+            <Settings size={16} color="#C4B5FD" />
           </View>
-          <ChevronRight size={16} color="#cbd5e1" />
+          <Text style={styles.menuLabel}>Configuración</Text>
+          <ChevronRight size={16} color="#6B7686" />
+        </View>
+        <View style={styles.menuItem}>
+          <View style={[styles.menuIcon, { backgroundColor: 'rgba(56,189,248,.14)' }]}>
+            <Bell size={16} color="#38BDF8" />
+          </View>
+          <Text style={styles.menuLabel}>Notificaciones</Text>
+          <ChevronRight size={16} color="#6B7686" />
+        </View>
+        <View style={styles.menuItem}>
+          <View style={[styles.menuIcon, { backgroundColor: 'rgba(245,158,11,.16)' }]}>
+            <CreditCard size={16} color="#FBBF24" />
+          </View>
+          <Text style={styles.menuLabel}>Membresía</Text>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>Activo</Text>
+          </View>
+          <ChevronRight size={16} color="#6B7686" />
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Support</Text>
+        <Text style={styles.sectionTitle}>SOPORTE</Text>
         <View style={styles.menuItem}>
-          <LogOut size={20} color="#ef4444" />
-          <Text style={[styles.menuLabel, { color: '#ef4444' }]}>Sign Out</Text>
+          <View style={[styles.menuIcon, { backgroundColor: 'rgba(34,197,94,.14)' }]}>
+            <HelpCircle size={16} color="#22C55E" />
+          </View>
+          <Text style={styles.menuLabel}>Ayuda</Text>
+          <ChevronRight size={16} color="#6B7686" />
+        </View>
+        <View style={styles.menuItem}>
+          <View style={[styles.menuIcon, { backgroundColor: 'rgba(124,58,237,.16)' }]}>
+            <Shield size={16} color="#C4B5FD" />
+          </View>
+          <Text style={styles.menuLabel}>Privacidad</Text>
+          <ChevronRight size={16} color="#6B7686" />
         </View>
       </View>
+
+      <Pressable style={styles.signOutBtn}>
+        <LogOut size={18} color="#EF4444" />
+        <Text style={styles.signOutText}>Cerrar sesión</Text>
+      </Pressable>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
+  container: { flex: 1, backgroundColor: '#0B0F17' },
+
   avatarSection: {
-    alignItems: 'center',
-    padding: 32,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    alignItems: 'center', padding: 32,
+    backgroundColor: '#111827', borderBottomWidth: 1, borderBottomColor: '#273244',
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#eff6ff',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: '#7C3AED',
+    alignItems: 'center', justifyContent: 'center',
   },
-  name: { fontSize: 20, fontWeight: '700', color: '#1e293b', marginTop: 12 },
-  email: { fontSize: 14, color: '#64748b', marginTop: 4 },
+  avatarText: { fontSize: 30, fontWeight: '800', color: '#0B0F17' },
+  name: { fontSize: 20, fontWeight: '700', color: '#F9FAFB', marginTop: 12 },
+  email: { fontSize: 14, color: '#9CA3AF', marginTop: 4 },
+  planBadge: {
+    marginTop: 10, backgroundColor: 'rgba(124,58,237,.16)',
+    borderRadius: 999, paddingHorizontal: 14, paddingVertical: 5,
+  },
+  planText: { fontSize: 12, fontWeight: '700', color: '#C4B5FD' },
+
   section: { padding: 16 },
   sectionTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 8,
+    fontSize: 11, fontWeight: '700', color: '#6B7686',
+    textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8,
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#1A2233', borderWidth: 1, borderColor: '#273244',
+    borderRadius: 16, padding: 14, marginBottom: 8,
   },
-  menuLabel: { flex: 1, fontSize: 16, color: '#1e293b', marginLeft: 12 },
+  menuIcon: {
+    width: 32, height: 32, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
+  },
+  menuLabel: { flex: 1, fontSize: 14, fontWeight: '600', color: '#F9FAFB', marginLeft: 12 },
   badge: {
-    backgroundColor: '#dcfce7',
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    backgroundColor: 'rgba(34,197,94,.14)', borderRadius: 999,
+    paddingHorizontal: 10, paddingVertical: 4,
   },
-  badgeText: { fontSize: 12, fontWeight: '600', color: '#16a34a' },
+  badgeText: { fontSize: 11, fontWeight: '600', color: '#22C55E' },
+
+  signOutBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    margin: 16, marginBottom: 40, backgroundColor: '#1A2233',
+    borderWidth: 1, borderColor: '#273244', borderRadius: 16, padding: 16,
+  },
+  signOutText: { fontSize: 14, fontWeight: '600', color: '#EF4444' },
 });

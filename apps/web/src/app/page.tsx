@@ -1,94 +1,216 @@
 import Link from "next/link";
-import { Music, Play, Users, BookOpen, Star, ArrowRight } from "lucide-react";
+import { Music, Play, BookOpen, Users, ArrowRight } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <div className="flex items-center gap-2">
-            <Music className="text-blue-600" size={24} />
-            <span className="font-bold text-xl text-gray-900">PlayingKeys</span>
-          </div>
-          <nav className="flex items-center gap-6">
-            <a href="#features" className="text-sm text-gray-600 hover:text-gray-900">Features</a>
-            <a href="#how-it-works" className="text-sm text-gray-600 hover:text-gray-900">How It Works</a>
-            <Link href="/admin" className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-              Admin Dashboard
-            </Link>
-          </nav>
+    <div style={{ minHeight: "100vh" }}>
+      <header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "18px 32px",
+          borderBottom: "1px solid var(--border)",
+          background: "rgba(11,15,23,.85)",
+          backdropFilter: "blur(10px)",
+          position: "sticky",
+          top: 0,
+          zIndex: 5,
+        }}
+      >
+        <div className="brand">
+          <Music style={{ width: 24, height: 24, color: "#C4B5FD" }} />
+          <span className="brand-name">PlayingKeys</span>
         </div>
+        <nav style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <a
+            href="#features"
+            style={{
+              color: "var(--text-2)",
+              fontSize: 14,
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
+            Características
+          </a>
+          <a
+            href="#how-it-works"
+            style={{
+              color: "var(--text-2)",
+              fontSize: 14,
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
+            Cómo funciona
+          </a>
+          <Link href="/admin" className="btn btn-primary">
+            <Play style={{ width: 16, height: 16 }} />
+            Panel Admin
+          </Link>
+        </nav>
       </header>
 
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Learn Piano
-            <span className="text-blue-600"> Interactive</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            A modern piano learning platform with interactive lessons,
-            real-time feedback, and progress tracking. Start your musical
-            journey today.
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link href="/admin" className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2">
-              <Play size={18} />
-              Get Started
-            </Link>
-            <a href="#features" className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50">
-              Learn More
-            </a>
-          </div>
+      <section
+        style={{
+          padding: "80px 32px",
+          maxWidth: 960,
+          margin: "0 auto",
+          textAlign: "center",
+        }}
+      >
+        <div className="eyebrow" style={{ justifyContent: "center", marginBottom: 16 }}>
+          <Music style={{ width: 13, height: 13 }} />
+          Plataforma de piano interactivo
+        </div>
+        <h1
+          style={{
+            fontSize: 48,
+            fontWeight: 800,
+            lineHeight: 1.15,
+            marginBottom: 18,
+            letterSpacing: "-0.03em",
+          }}
+        >
+          PlayingKeys —<br />
+          <span style={{ color: "#C4B5FD" }}>Aprende piano interactivo</span>
+        </h1>
+        <p
+          style={{
+            color: "var(--text-2)",
+            fontSize: 17,
+            lineHeight: 1.6,
+            maxWidth: 540,
+            margin: "0 auto 32px",
+          }}
+        >
+          Practica con un teclado virtual, sigue lecciones guiadas y mide tu
+          progreso. Todo desde tu navegador, sin necesidad de piano físico.
+        </p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 14,
+          }}
+        >
+          <Link href="/admin" className="btn btn-primary" style={{ padding: "14px 28px", fontSize: 15 }}>
+            <Play style={{ width: 18, height: 18 }} />
+            Empezar ahora
+          </Link>
+          <a href="#features" className="btn btn-ghost" style={{ padding: "14px 28px", fontSize: 15 }}>
+            Saber más
+          </a>
         </div>
       </section>
 
-      <section id="features" className="py-20 bg-gray-50 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Everything You Need</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { icon: Music, title: "Interactive Piano", desc: "Play real piano keys with accurate sound. Practice anywhere without a physical piano." },
-              { icon: BookOpen, title: "Structured Lessons", desc: "Follow a progressive curriculum from basics to advanced techniques." },
-              { icon: Users, title: "Teacher Dashboard", desc: "Teachers can manage students, track progress, and assign custom lessons." },
-            ].map((f) => (
-              <div key={f.title} className="bg-white rounded-xl p-6 border border-gray-200">
-                <f.icon className="text-blue-600 mb-4" size={32} />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{f.title}</h3>
-                <p className="text-gray-600 text-sm">{f.desc}</p>
+      <section
+        id="features"
+        style={{ padding: "64px 32px", maxWidth: 1100, margin: "0 auto" }}
+      >
+        <h2 style={{ fontSize: 28, fontWeight: 800, textAlign: "center", marginBottom: 40 }}>
+          Todo lo que necesitas
+        </h2>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: 18,
+          }}
+        >
+          {[
+            {
+              icon: Music,
+              title: "Piano interactivo",
+              desc: "Toca teclas reales con sonido preciso. Practica en cualquier lugar sin un piano físico.",
+              color: "var(--violet-soft)",
+              iconColor: "#C4B5FD",
+            },
+            {
+              icon: BookOpen,
+              title: "Lecciones guiadas",
+              desc: "Sigue un currículo progresivo desde lo básico hasta técnicas avanzadas.",
+              color: "var(--blue-soft)",
+              iconColor: "var(--blue)",
+            },
+            {
+              icon: Users,
+              title: "Panel de profesores",
+              desc: "Los profesores gestionan estudiantes, rastrean progreso y asignan lecciones.",
+              color: "var(--green-soft)",
+              iconColor: "var(--green)",
+            },
+          ].map((f) => (
+            <div
+              key={f.title}
+              className="panel"
+              style={{ display: "flex", flexDirection: "column", gap: 12 }}
+            >
+              <div
+                className="stat-icon"
+                style={{ background: f.color, color: f.iconColor, marginBottom: 0 }}
+              >
+                <f.icon style={{ width: 18, height: 18 }} />
               </div>
-            ))}
-          </div>
+              <h3 style={{ fontSize: 16, fontWeight: 700 }}>{f.title}</h3>
+              <p style={{ color: "var(--text-2)", fontSize: 13.5, lineHeight: 1.55 }}>{f.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section id="how-it-works" className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">How It Works</h2>
-          <div className="space-y-8">
-            {[
-              { step: "1", title: "Sign Up", desc: "Create your account and get assigned to a teacher." },
-              { step: "2", title: "Practice", desc: "Follow interactive lessons on your mobile device." },
-              { step: "3", title: "Progress", desc: "Track your improvement and earn achievements." },
-            ].map((s) => (
-              <div key={s.step} className="flex items-start gap-6">
-                <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
-                  {s.step}
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{s.title}</h3>
-                  <p className="text-gray-600 mt-1">{s.desc}</p>
-                </div>
+      <section
+        id="how-it-works"
+        style={{ padding: "64px 32px", maxWidth: 800, margin: "0 auto" }}
+      >
+        <h2 style={{ fontSize: 28, fontWeight: 800, textAlign: "center", marginBottom: 40 }}>
+          Cómo funciona
+        </h2>
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          {[
+            { step: "1", title: "Regístrate", desc: "Crea tu cuenta y accede a tu panel personalizado." },
+            { step: "2", title: "Practica", desc: "Sigue lecciones interactivas con el teclado virtual." },
+            { step: "3", title: "Progresa", desc: "Rastrea tu mejora y desbloquea insignias." },
+          ].map((s) => (
+            <div key={s.step} style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, var(--violet), #9F67F2)",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 800,
+                  fontSize: 18,
+                  flexShrink: 0,
+                }}
+              >
+                {s.step}
               </div>
-            ))}
-          </div>
+              <div>
+                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{s.title}</h3>
+                <p style={{ color: "var(--text-2)", fontSize: 14 }}>{s.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      <footer className="border-t border-gray-200 py-8 px-4">
-        <div className="max-w-7xl mx-auto text-center text-sm text-gray-500">
-          PlayingKeys. Piano learning platform.
-        </div>
+      <footer
+        style={{
+          borderTop: "1px solid var(--border)",
+          padding: "32px",
+          textAlign: "center",
+          color: "var(--text-3)",
+          fontSize: 13,
+        }}
+      >
+        PlayingKeys. Plataforma de aprendizaje de piano.
       </footer>
     </div>
   );
