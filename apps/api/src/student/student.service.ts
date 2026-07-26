@@ -16,7 +16,11 @@ export class StudentService {
 
   async findAll() {
     return this.prisma.student.findMany({
-      include: { user: true, teacher: { include: { user: true } } },
+      include: {
+        user: true,
+        teacher: { include: { user: true } },
+        progress: { select: { id: true, status: true, score: true } },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }

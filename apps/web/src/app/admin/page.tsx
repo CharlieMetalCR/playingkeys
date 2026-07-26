@@ -184,6 +184,7 @@ export default function AdminPage() {
   const [lessonDetail, setLessonDetail] = useState<Record<string, unknown> | null>(null);
   const [lessonLoading, setLessonLoading] = useState(false);
   const [adminStudents, setAdminStudents] = useState<AdminStudentRow[]>([]);
+  const [adminStats, setAdminStats] = useState({ students: 0, lessons: 0 });
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const metroTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -365,30 +366,44 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    fetch(`${API_BASE}/students`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setAdminStudents(
-            data.map((s: Record<string, unknown>) => {
-              const user = s.user as Record<string, unknown> | undefined;
-              const name = (user?.name as string) || "Student";
-              const initials = name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
-              const hue = Math.abs(name.charCodeAt(0) * 7 + (name.charCodeAt(1) || 0) * 13) % 360;
-              return {
-                initials,
-                hue,
-                name,
-                course: "—",
-                progress: 0,
-                status: "online" as const,
-                statusLabel: "admin.statusOnline",
-              };
-            }),
-          );
-        }
-      })
-      .catch(() => {});
+    Promise.all([
+      fetch(`${API_BASE}/students`).then((r) => r.json()),
+      fetch(`${API_BASE}/units`).then((r) => r.json()),
+    ]).then(([studentsData, unitsData]) => {
+      if (Array.isArray(studentsData)) {
+        setAdminStats((prev) => ({ ...prev, students: studentsData.length }));
+        setAdminStudents(
+          studentsData.map((s: Record<string, unknown>) => {
+            const user = s.user as Record<string, unknown> | undefined;
+            const teacher = s.teacher as Record<string, unknown> | undefined;
+            const teacherUser = teacher?.user as Record<string, unknown> | undefined;
+            const progress = Array.isArray(s.progress) ? s.progress as Array<Record<string, unknown>> : [];
+            const completed = progress.filter((p) => p.status === "COMPLETED").length;
+            const name = (user?.name as string) || "Student";
+            const initials = name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
+            const hue = Math.abs(name.charCodeAt(0) * 7 + (name.charCodeAt(1) || 0) * 13) % 360;
+            const courseName = teacherUser ? `${teacherUser.name as string}` : "—";
+            const progressPct = progress.length > 0 ? Math.round((completed / progress.length) * 100) : 0;
+            return {
+              initials,
+              hue,
+              name,
+              course: courseName,
+              progress: progressPct,
+              status: "online" as const,
+              statusLabel: "admin.statusOnline",
+            };
+          }),
+        );
+      }
+      if (Array.isArray(unitsData)) {
+        const totalLessons = unitsData.reduce((sum: number, u: Record<string, unknown>) => {
+          const lessons = Array.isArray(u.lessons) ? u.lessons.length : 0;
+          return sum + lessons;
+        }, 0);
+        setAdminStats((prev) => ({ ...prev, lessons: totalLessons }));
+      }
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -922,12 +937,12 @@ export default function AdminPage() {
           <section className="stat-grid">
             <div className="stat-card">
               <div className="stat-icon stat-icon-violet"><Users /></div>
-              <div className="stat-num">3,482</div>
+              <div className="stat-num">{adminStats.students}</div>
               <div className="stat-label">{t("admin.activeStudents")}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon stat-icon-blue"><LibraryBig /></div>
-              <div className="stat-num">46</div>
+              <div className="stat-num">{adminStats.lessons}</div>
               <div className="stat-label">{t("admin.publishedCourses")}</div>
             </div>
             <div className="stat-card">
