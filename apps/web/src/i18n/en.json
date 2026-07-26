@@ -134,5 +134,25 @@
   "auth.adminLogin": "Admin panel access",
   "auth.error": "Invalid credentials",
   "auth.loading": "Loading...",
-  "auth.logout": "Sign out"
+  "auth.logout": "Sign out",
+
+  "nav.teacher": "Teacher",
+  "view.teacher.title": "Teacher Dashboard",
+  "view.teacher.subtitle": "Overview of your assigned students and their progress",
+  "teacher.myStudents": "My Students",
+  "teacher.studentCount": "{{count}} students assigned",
+  "teacher.noStudents": "No students assigned yet",
+  "teacher.tableStudent": "Student",
+  "teacher.tableProgress": "Progress",
+  "teacher.tableCompleted": "Completed",
+  "teacher.tableAvgScore": "Avg. Score",
+  "teacher.tableStatus": "Status",
+  "teacher.completedLessons": "{{count}} / {{total}} lessons",
+  "teacher.avgScore": "{{score}}%",
+  "teacher.statusActive": "Active",
+  "teacher.statusInactive": "Inactive",
+  "teacher.overview": "Overview",
+  "teacher.totalStudents": "Total students",
+  "teacher.avgClassProgress": "Avg. class progress",
+  "teacher.totalCompleted": "Total lessons completed"
 }

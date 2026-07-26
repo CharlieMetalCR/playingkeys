@@ -134,5 +134,25 @@
   "auth.adminLogin": "Acceso al panel de administración",
   "auth.error": "Credenciales inválidas",
   "auth.loading": "Cargando...",
-  "auth.logout": "Cerrar sesión"
+  "auth.logout": "Cerrar sesión",
+
+  "nav.teacher": "Profesor",
+  "view.teacher.title": "Panel del Profesor",
+  "view.teacher.subtitle": "Resumen de tus estudiantes asignados y su progreso",
+  "teacher.myStudents": "Mis Estudiantes",
+  "teacher.studentCount": "{{count}} estudiantes asignados",
+  "teacher.noStudents": "Sin estudiantes asignados",
+  "teacher.tableStudent": "Estudiante",
+  "teacher.tableProgress": "Progreso",
+  "teacher.tableCompleted": "Completadas",
+  "teacher.tableAvgScore": "Puntuación",
+  "teacher.tableStatus": "Estado",
+  "teacher.completedLessons": "{{count}} / {{total}} lecciones",
+  "teacher.avgScore": "{{score}}%",
+  "teacher.statusActive": "Activo",
+  "teacher.statusInactive": "Inactivo",
+  "teacher.overview": "Resumen",
+  "teacher.totalStudents": "Total estudiantes",
+  "teacher.avgClassProgress": "Progreso promedio",
+  "teacher.totalCompleted": "Lecciones completadas"
 }

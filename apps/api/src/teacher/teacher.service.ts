@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
@@ -26,6 +26,25 @@ export class TeacherService {
       where: { id },
       include: { user: true, students: { include: { user: true } } },
     });
+  }
+
+  async findOwnStudents(userId: string) {
+    const teacher = await this.prisma.teacher.findUnique({
+      where: { userId },
+      include: {
+        students: {
+          include: {
+            user: true,
+            progress: {
+              select: { id: true, status: true, score: true, lessonId: true, completedAt: true },
+              orderBy: { completedAt: 'desc' },
+            },
+          },
+        },
+      },
+    });
+    if (!teacher) throw new NotFoundException('Teacher profile not found');
+    return teacher;
   }
 
   async update(id: string, dto: UpdateTeacherDto) {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { TeacherService } from './teacher.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
@@ -25,6 +25,13 @@ export class TeacherController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.teacherService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('TEACHER')
+  @Get('me/students')
+  findOwnStudents(@Request() req: { user: { id: string } }) {
+    return this.teacherService.findOwnStudents(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
