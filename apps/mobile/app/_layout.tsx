@@ -1,7 +1,10 @@
 import { Tabs } from 'expo-router';
 import { LayoutGrid, Piano, LibraryBig, ChartNoAxesCombined, User } from 'lucide-react-native';
+import { I18nProvider, useTranslation } from '../i18n';
 
-export default function TabLayout() {
+function TabNavigator() {
+  const { t } = useTranslation();
+
   return (
     <Tabs
       screenOptions={{
@@ -32,7 +35,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Inicio',
+          title: t('tab.home'),
           tabBarIcon: ({ color, size }) => <LayoutGrid size={size} color={color} />,
           headerTitle: 'PlayingKeys',
         }}
@@ -40,31 +43,39 @@ export default function TabLayout() {
       <Tabs.Screen
         name="practice"
         options={{
-          title: 'Práctica',
+          title: t('tab.practice'),
           tabBarIcon: ({ color, size }) => <Piano size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="courses"
         options={{
-          title: 'Cursos',
+          title: t('tab.courses'),
           tabBarIcon: ({ color, size }) => <LibraryBig size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="progress"
         options={{
-          title: 'Progreso',
+          title: t('tab.progress'),
           tabBarIcon: ({ color, size }) => <ChartNoAxesCombined size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Perfil',
+          title: t('tab.profile'),
           tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>
+  );
+}
+
+export default function TabLayout() {
+  return (
+    <I18nProvider>
+      <TabNavigator />
+    </I18nProvider>
   );
 }

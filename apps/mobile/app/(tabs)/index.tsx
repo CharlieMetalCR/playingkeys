@@ -1,25 +1,27 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Flame, BookOpen, Clock, Zap, Music, ChevronRight } from 'lucide-react-native';
+import { useTranslation } from '../../i18n';
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.greetingRow}>
         <View>
-          <Text style={styles.greeting}>Buenas tardes</Text>
-          <Text style={styles.greetingSub}>¿Listo para practicar?</Text>
+          <Text style={styles.greeting}>{t('home.greeting')}</Text>
+          <Text style={styles.greetingSub}>{t('home.ready')}</Text>
         </View>
         <View style={styles.streakChip}>
           <Flame size={14} color="#FBBF24" />
-          <Text style={styles.streakText}>7 días</Text>
+          <Text style={styles.streakText}>{t('home.streak', { count: 7 })}</Text>
         </View>
       </View>
 
       <View style={styles.continueCard}>
-        <Text style={styles.continueLabel}>Continuar práctica</Text>
-        <Text style={styles.continueTitle}>Lección 3: Acordes mayores</Text>
+        <Text style={styles.continueLabel}>{t('home.continue')}</Text>
+        <Text style={styles.continueTitle}>{t('home.continueTitle')}</Text>
         <Text style={styles.continueDesc}>
-          Practica la progresión I-IV-V-I en C mayor con la mano derecha.
+          {t('home.continueDesc')}
         </Text>
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: '60%' }]} />
@@ -27,11 +29,11 @@ export default function HomeScreen() {
         <View style={styles.continueMeta}>
           <Text style={styles.metaText}>60%</Text>
           <Text style={styles.metaDot}>·</Text>
-          <Text style={styles.metaText}>~12 min restantes</Text>
+          <Text style={styles.metaText}>{t('home.remaining')}</Text>
         </View>
         <Pressable style={styles.continueBtn}>
           <Music size={16} color="#fff" />
-          <Text style={styles.continueBtnText}>Continuar</Text>
+          <Text style={styles.continueBtnText}>{t('home.continueBtn')}</Text>
         </Pressable>
       </View>
 
@@ -41,46 +43,46 @@ export default function HomeScreen() {
             <BookOpen size={18} color="#C4B5FD" />
           </View>
           <Text style={styles.statValue}>12</Text>
-          <Text style={styles.statLabel}>Cursos completados</Text>
+          <Text style={styles.statLabel}>{t('home.coursesCompleted')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(56,189,248,.14)' }]}>
             <Music size={18} color="#38BDF8" />
           </View>
           <Text style={styles.statValue}>48</Text>
-          <Text style={styles.statLabel}>Lecciones</Text>
+          <Text style={styles.statLabel}>{t('home.lessons')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(34,197,94,.14)' }]}>
             <Clock size={18} color="#22C55E" />
           </View>
           <Text style={styles.statValue}>24h</Text>
-          <Text style={styles.statLabel}>Tiempo total</Text>
+          <Text style={styles.statLabel}>{t('home.totalTime')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(245,158,11,.16)' }]}>
             <Zap size={18} color="#FBBF24" />
           </View>
           <Text style={styles.statValue}>7</Text>
-          <Text style={styles.statLabel}>Racha</Text>
+          <Text style={styles.statLabel}>{t('home.streakLabel')}</Text>
         </View>
       </View>
 
       <View style={styles.panel}>
         <View style={styles.panelHead}>
-          <Text style={styles.panelTitle}>Actividad próxima</Text>
-          <Text style={styles.panelMeta}>Esta semana</Text>
+          <Text style={styles.panelTitle}>{t('home.activityTitle')}</Text>
+          <Text style={styles.panelMeta}>{t('home.activityWeek')}</Text>
         </View>
         <View style={styles.activityItem}>
           <View style={styles.activityIcon}>
             <Music size={16} color="#9CA3AF" />
           </View>
           <View style={styles.activityBody}>
-            <Text style={styles.activityTitle}>Práctica — Acordes mayores</Text>
-            <Text style={styles.activitySub}>Hoy, 6:00 PM</Text>
+            <Text style={styles.activityTitle}>{t('home.practiceLabel')}</Text>
+            <Text style={styles.activitySub}>{t('home.practiceTime')}</Text>
           </View>
           <View style={[styles.chip, { backgroundColor: 'rgba(124,58,237,.16)' }]}>
-            <Text style={[styles.chipText, { color: '#C4B5FD' }]}>Programado</Text>
+            <Text style={[styles.chipText, { color: '#C4B5FD' }]}>{t('home.scheduled')}</Text>
           </View>
         </View>
         <View style={styles.activityItem}>
@@ -88,11 +90,11 @@ export default function HomeScreen() {
             <BookOpen size={16} color="#9CA3AF" />
           </View>
           <View style={styles.activityBody}>
-            <Text style={styles.activityTitle}>Lección 4 — Acordes menores</Text>
-            <Text style={styles.activitySub}>Mañana, 10:00 AM</Text>
+            <Text style={styles.activityTitle}>{t('home.lesson4Label')}</Text>
+            <Text style={styles.activitySub}>{t('home.lesson4Time')}</Text>
           </View>
           <View style={[styles.chip, { backgroundColor: 'rgba(56,189,248,.14)' }]}>
-            <Text style={[styles.chipText, { color: '#38BDF8' }]}>Siguiente</Text>
+            <Text style={[styles.chipText, { color: '#38BDF8' }]}>{t('home.next')}</Text>
           </View>
         </View>
         <View style={styles.activityItem}>
@@ -100,11 +102,11 @@ export default function HomeScreen() {
             <Flame size={16} color="#9CA3AF" />
           </View>
           <View style={styles.activityBody}>
-            <Text style={styles.activityTitle}>Revisión semanal</Text>
-            <Text style={styles.activitySub}>Viernes, 5:00 PM</Text>
+            <Text style={styles.activityTitle}>{t('home.weeklyReview')}</Text>
+            <Text style={styles.activitySub}>{t('home.weeklyTime')}</Text>
           </View>
           <View style={[styles.chip, { backgroundColor: 'rgba(245,158,11,.16)' }]}>
-            <Text style={[styles.chipText, { color: '#FBBF24' }]}>Pendiente</Text>
+            <Text style={[styles.chipText, { color: '#FBBF24' }]}>{t('home.pending')}</Text>
           </View>
         </View>
       </View>

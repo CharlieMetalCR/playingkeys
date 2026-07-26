@@ -53,3 +53,35 @@ export async function fetchLessons(): Promise<ApiLesson[]> {
 export async function fetchLesson(id: string): Promise<ApiLesson> {
   return apiFetch<ApiLesson>(`/lessons/${id}`);
 }
+
+export interface ApiProgress {
+  id: string;
+  studentId: string;
+  lessonId: string;
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'NEEDS_REVIEW';
+  score: number | null;
+  completedAt: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  lesson?: ApiLesson;
+}
+
+export async function createProgress(data: {
+  studentId: string;
+  lessonId: string;
+  status?: string;
+  score?: number;
+}): Promise<ApiProgress> {
+  const res = await fetch(`${API_URL}/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchStudentProgress(studentId: string): Promise<ApiProgress[]> {
+  return apiFetch<ApiProgress[]>(`/progress/student/${studentId}`);
+}

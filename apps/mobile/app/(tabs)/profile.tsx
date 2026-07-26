@@ -1,7 +1,9 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { User, Settings, CreditCard, LogOut, ChevronRight, Bell, HelpCircle, Shield } from 'lucide-react-native';
+import { useTranslation } from '../../i18n';
 
 export default function ProfileScreen() {
+  const { t, locale, setLocale } = useTranslation();
   return (
     <ScrollView style={styles.container}>
       <View style={styles.avatarSection}>
@@ -21,7 +23,7 @@ export default function ProfileScreen() {
           <View style={[styles.menuIcon, { backgroundColor: 'rgba(124,58,237,.16)' }]}>
             <Settings size={16} color="#C4B5FD" />
           </View>
-          <Text style={styles.menuLabel}>Configuración</Text>
+          <Text style={styles.menuLabel}>{t('profile.settings')}</Text>
           <ChevronRight size={16} color="#6B7686" />
         </View>
         <View style={styles.menuItem}>
@@ -61,9 +63,24 @@ export default function ProfileScreen() {
         </View>
       </View>
 
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('profile.language')}</Text>
+        <Pressable
+          style={styles.menuItem}
+          onPress={() => setLocale(locale === 'es' ? 'en' : 'es')}
+        >
+          <View style={[styles.menuIcon, { backgroundColor: 'rgba(124,58,237,.16)' }]}>
+            <Settings size={16} color="#C4B5FD" />
+          </View>
+          <Text style={styles.menuLabel}>{t('profile.selectLanguage')}</Text>
+          <Text style={styles.menuLabel}>{locale === 'es' ? 'Español' : 'English'}</Text>
+          <ChevronRight size={16} color="#6B7686" />
+        </Pressable>
+      </View>
+
       <Pressable style={styles.signOutBtn}>
         <LogOut size={18} color="#EF4444" />
-        <Text style={styles.signOutText}>Cerrar sesión</Text>
+        <Text style={styles.signOutText}>{t('profile.logout')}</Text>
       </Pressable>
     </ScrollView>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "../../i18n";
 import {
   LayoutGrid,
   Piano,
@@ -70,7 +71,7 @@ interface PianoKeyDef {
 interface CourseDef {
   title: string;
   desc: string;
-  level: "Principiante" | "Intermedio" | "Avanzado";
+  level: "courses.level.beginner" | "courses.level.intermediate" | "courses.level.advanced";
   progress: number;
   locked: boolean;
   coverClass: string;
@@ -85,6 +86,7 @@ interface AdminStudentRow {
   progress: number;
   status: "online" | "idle";
   statusLabel: string;
+  idleDays?: number;
 }
 
 const API_BASE = "http://localhost:3001/api";
@@ -107,20 +109,20 @@ const PIANO_KEYS: PianoKeyDef[] = [
 const BLACK_POSITIONS = [12.5, 25, 51, 63.5, 76];
 
 const STATIC_COURSES: CourseDef[] = [
-  { title: "Fundamentos del piano", desc: "Postura, lectura de pentagrama y tus primeras cinco notas.", level: "Principiante", progress: 100, locked: false, coverClass: "cv-1", icon: Sparkles },
-  { title: "Armonía básica", desc: "Acordes mayores y menores, e inversiones esenciales.", level: "Principiante", progress: 64, locked: false, coverClass: "cv-2", icon: Layers },
-  { title: "Ritmo y compás", desc: "Subdivisiones, síncopa y lectura rítmica con el metrónomo.", level: "Intermedio", progress: 30, locked: false, coverClass: "cv-3", icon: Activity },
-  { title: "Improvisación básica", desc: "Escalas pentatónicas aplicadas sobre progresiones simples.", level: "Intermedio", progress: 0, locked: true, coverClass: "cv-4", icon: Sparkles },
-  { title: "Piano clásico I", desc: "Repertorio guiado: Bach, Clementi y piezas de nivel inicial.", level: "Intermedio", progress: 12, locked: false, coverClass: "cv-5", icon: Landmark },
-  { title: "Piano jazz para principiantes", desc: "Voicings, swing feel y tu primer solo de 12 compases.", level: "Avanzado", progress: 0, locked: true, coverClass: "cv-6", icon: MoonStar },
+  { title: "Fundamentos del piano", desc: "Postura, lectura de pentagrama y tus primeras cinco notas.", level: "courses.level.beginner", progress: 100, locked: false, coverClass: "cv-1", icon: Sparkles },
+  { title: "Armonía básica", desc: "Acordes mayores y menores, e inversiones esenciales.", level: "courses.level.beginner", progress: 64, locked: false, coverClass: "cv-2", icon: Layers },
+  { title: "Ritmo y compás", desc: "Subdivisiones, síncopa y lectura rítmica con el metrónomo.", level: "courses.level.intermediate", progress: 30, locked: false, coverClass: "cv-3", icon: Activity },
+  { title: "Improvisación básica", desc: "Escalas pentatónicas aplicadas sobre progresiones simples.", level: "courses.level.intermediate", progress: 0, locked: true, coverClass: "cv-4", icon: Sparkles },
+  { title: "Piano clásico I", desc: "Repertorio guiado: Bach, Clementi y piezas de nivel inicial.", level: "courses.level.intermediate", progress: 12, locked: false, coverClass: "cv-5", icon: Landmark },
+  { title: "Piano jazz para principiantes", desc: "Voicings, swing feel y tu primer solo de 12 compases.", level: "courses.level.advanced", progress: 0, locked: true, coverClass: "cv-6", icon: MoonStar },
 ];
 
 const ADMIN_STUDENTS: AdminStudentRow[] = [
-  { initials: "MP", hue: 210, name: "Mateo Pineda", course: "Armonía básica", progress: 82, status: "online", statusLabel: "Activo" },
-  { initials: "LR", hue: 330, name: "Lucía Ramírez", course: "Ritmo y compás", progress: 45, status: "online", statusLabel: "Activo" },
-  { initials: "JG", hue: 45, name: "Julián Gómez", course: "Fundamentos del piano", progress: 97, status: "idle", statusLabel: "Inactivo 3d" },
-  { initials: "NA", hue: 150, name: "Nadia Ayala", course: "Piano clásico I", progress: 20, status: "online", statusLabel: "Activo" },
-  { initials: "DC", hue: 265, name: "Diego Castro", course: "Armonía básica", progress: 12, status: "idle", statusLabel: "Inactivo 6d" },
+  { initials: "MP", hue: 210, name: "Mateo Pineda", course: "Armonía básica", progress: 82, status: "online", statusLabel: "admin.statusOnline" },
+  { initials: "LR", hue: 330, name: "Lucía Ramírez", course: "Ritmo y compás", progress: 45, status: "online", statusLabel: "admin.statusOnline" },
+  { initials: "JG", hue: 45, name: "Julián Gómez", course: "Fundamentos del piano", progress: 97, status: "idle", statusLabel: "admin.statusIdle", idleDays: 3 },
+  { initials: "NA", hue: 150, name: "Nadia Ayala", course: "Piano clásico I", progress: 20, status: "online", statusLabel: "admin.statusOnline" },
+  { initials: "DC", hue: 265, name: "Diego Castro", course: "Armonía básica", progress: 12, status: "idle", statusLabel: "admin.statusIdle", idleDays: 6 },
 ];
 
 const WEEKS_DATA = [
@@ -143,15 +145,18 @@ const WEEK_DAYS = [
   { label: "D", done: false },
 ];
 
-const viewMeta: Record<ViewId, { title: string; subtitle: string }> = {
-  dashboard: { title: "Buenas tardes, Sofía", subtitle: "Llevas 12 días seguidos practicando. Sigue así." },
-  practice: { title: "Práctica guiada", subtitle: "Módulo 3 · Acordes mayores con inversión" },
-  courses: { title: "Mis cursos", subtitle: "6 cursos activos · 2 por desbloquear" },
-  progress: { title: "Tu progreso", subtitle: "Un resumen claro de tu constancia y mejora" },
-  admin: { title: "Administración", subtitle: "Estado general de la plataforma PlayingKeys" },
-};
+function getViewMeta(t: (key: string) => string): Record<ViewId, { title: string; subtitle: string }> {
+  return {
+    dashboard: { title: t("view.dashboard.title"), subtitle: t("view.dashboard.subtitle") },
+    practice: { title: t("view.practice.title"), subtitle: t("view.practice.subtitle") },
+    courses: { title: t("view.courses.title"), subtitle: t("view.courses.subtitle") },
+    progress: { title: t("view.progress.title"), subtitle: t("view.progress.subtitle") },
+    admin: { title: t("view.admin.title"), subtitle: t("view.admin.subtitle") },
+  };
+}
 
 export default function AdminPage() {
+  const { t, locale, setLocale } = useTranslation();
   const [view, setViewState] = useState<ViewId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -161,7 +166,7 @@ export default function AdminPage() {
   const [targetIndex, setTargetIndex] = useState(0);
   const [correctStreak, setCorrectStreak] = useState(6);
   const [feedbackCorrect, setFeedbackCorrect] = useState(false);
-  const [feedbackMsg, setFeedbackMsg] = useState("Toca una tecla del teclado para comenzar");
+  const [feedbackMsg, setFeedbackMsg] = useState("feedback.start");
   const [feedbackIcon, setFeedbackIcon] = useState<"circle-dashed" | "check-circle-2" | "circle-x">("circle-dashed");
   const [waveHeights, setWaveHeights] = useState<number[]>([]);
   const [heatmapCells, setHeatmapCells] = useState<number[]>([]);
@@ -206,21 +211,21 @@ export default function AdminPage() {
         setCorrectStreak((s) => s + 1);
         setFeedbackCorrect(true);
         setFeedbackIcon("check-circle-2");
-        setFeedbackMsg(`¡Correcto! Era ${target.label} (${target.note})`);
+        setFeedbackMsg(t("feedback.correct", { label: target.label, note: target.note }));
         setTimeout(() => {
           setFeedbackCorrect(false);
           setFeedbackIcon("circle-dashed");
-          setFeedbackMsg("Toca una tecla del teclado para continuar");
+          setFeedbackMsg(t("feedback.continue"));
           setTargetIndex(Math.floor(Math.random() * PIANO_KEYS.length));
         }, 900);
       } else {
         setCorrectStreak(0);
         setFeedbackCorrect(false);
         setFeedbackIcon("circle-x");
-        setFeedbackMsg(`Era ${target.label} (${target.note}) — inténtalo de nuevo`);
+        setFeedbackMsg(t("feedback.wrong", { label: target.label, note: target.note }));
       }
     },
-    [],
+    [t],
   );
 
   const pressKey = useCallback(
@@ -307,7 +312,7 @@ export default function AdminPage() {
             data.map((u: Record<string, unknown>, i: number) => ({
               title: (u.title as string) || (u.name as string) || `Unidad ${i + 1}`,
               desc: (u.description as string) || "Continúa tu aprendizaje.",
-              level: "Principiante" as const,
+              level: "courses.level.beginner" as const,
               progress: 0,
               locked: false,
               coverClass: cvClasses[i % cvClasses.length],
@@ -332,7 +337,7 @@ export default function AdminPage() {
     };
   }, []);
 
-  const meta = viewMeta[view];
+  const meta = getViewMeta(t)[view];
   const barMax = Math.max(...WEEKS_DATA.map((w) => w.minutes));
 
   const FeedbackIconComp =
@@ -352,44 +357,44 @@ export default function AdminPage() {
             </svg>
             <span className="brand-name">PlayingKeys</span>
           </div>
-          <button className="icon-btn sidebar-toggle" aria-label="Colapsar menú">
+          <button className="icon-btn sidebar-toggle" aria-label={t("nav.collapse")}>
             <PanelLeftClose />
           </button>
         </div>
 
-        <nav className="nav" aria-label="Navegación principal">
+        <nav className="nav" aria-label={t("nav.mainAria")}>
           <button className={`nav-item ${view === "dashboard" ? "is-active" : ""}`} onClick={() => setView("dashboard")}>
-            <LayoutGrid /><span>Panel</span>
+            <LayoutGrid /><span>{t("nav.dashboard")}</span>
           </button>
           <button className={`nav-item ${view === "practice" ? "is-active" : ""}`} onClick={() => setView("practice")}>
-            <Piano /><span>Práctica</span>
+            <Piano /><span>{t("nav.practice")}</span>
           </button>
           <button className={`nav-item ${view === "courses" ? "is-active" : ""}`} onClick={() => setView("courses")}>
-            <LibraryBig /><span>Mis cursos</span>
+            <LibraryBig /><span>{t("nav.courses")}</span>
           </button>
           <button className={`nav-item ${view === "progress" ? "is-active" : ""}`} onClick={() => setView("progress")}>
-            <ChartNoAxesCombined /><span>Progreso</span>
+            <ChartNoAxesCombined /><span>{t("nav.progress")}</span>
           </button>
           {isAdmin && <div className="nav-divider" />}
           {isAdmin && (
             <button className={`nav-item ${view === "admin" ? "is-active" : ""}`} onClick={() => setView("admin")}>
-              <ShieldHalf /><span>Administración</span>
+              <ShieldHalf /><span>{t("nav.admin")}</span>
             </button>
           )}
         </nav>
 
         <div className="sidebar-bottom">
-          <button className="role-switch" onClick={toggleRole} title="Cambiar de rol (demo)">
+          <button className="role-switch" onClick={toggleRole} title={t("role.switchTitle")}>
             <Repeat />
-            <span>{isAdmin ? "Ver como Estudiante" : "Ver como Admin"}</span>
+            <span>{isAdmin ? t("role.student") : t("role.admin")}</span>
           </button>
           <div className="user-card">
             <div className="avatar avatar-md" style={{ "--h": "265" } as React.CSSProperties}>SL</div>
             <div className="user-meta">
               <span className="user-name">Sofía Larios</span>
-              <span className="user-plan">Plan Premium</span>
+              <span className="user-plan">{t("user.plan")}</span>
             </div>
-            <button className="icon-btn ghost" aria-label="Ajustes">
+            <button className="icon-btn ghost" aria-label={t("user.settings")}>
               <Settings2 />
             </button>
           </div>
@@ -398,7 +403,7 @@ export default function AdminPage() {
 
       <div className="main-col">
         <header className="topbar">
-          <button className="icon-btn mobile-only" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú">
+          <button className="icon-btn mobile-only" onClick={() => setSidebarOpen(true)} aria-label={t("nav.openMenu")}>
             <Menu />
           </button>
           <div className="topbar-title">
@@ -408,15 +413,23 @@ export default function AdminPage() {
           <div className="topbar-actions">
             <label className="search">
               <Search />
-              <input type="text" placeholder="Buscar lecciones, acordes, cursos…" aria-label="Buscar" />
+              <input type="text" placeholder={t("search.placeholder")} aria-label={t("search.label")} />
             </label>
-            <div className="streak-chip" title="Racha de práctica">
+            <div className="streak-chip" title={t("streak.title")}>
               <Flame />
-              <span>12 días</span>
+              <span>{t("streak.days")}</span>
             </div>
-            <button className="icon-btn" aria-label="Notificaciones">
+            <button className="icon-btn" aria-label={t("notifications")}>
               <Bell />
               <span className="dot-badge"></span>
+            </button>
+            <button
+              className="icon-btn"
+              onClick={() => setLocale(locale === "es" ? "en" : "es")}
+              title={locale === "es" ? "Switch to English" : "Cambiar a español"}
+              aria-label={locale === "es" ? "Switch to English" : "Cambiar a español"}
+            >
+              {locale === "es" ? "EN" : "ES"}
             </button>
             <div className="avatar avatar-sm" style={{ "--h": "265" } as React.CSSProperties}>SL</div>
           </div>
@@ -426,23 +439,23 @@ export default function AdminPage() {
         <main className={`view ${view === "dashboard" ? "is-active" : ""}`}>
           <section className="continue-card">
             <div className="continue-info">
-              <span className="eyebrow"><Disc3 /> Módulo 3 · Armonía básica</span>
-              <h2>Acordes mayores con inversión</h2>
-              <p>Practica las inversiones de C, G y F hasta lograr transiciones limpias sin mirar el teclado.</p>
+              <span className="eyebrow"><Disc3 /> {t("continue.module")}</span>
+              <h2>{t("continue.lesson")}</h2>
+              <p>{t("continue.desc")}</p>
               <div className="progress-track" role="progressbar" aria-valuenow={64} aria-valuemin={0} aria-valuemax={100}>
                 <div className="progress-fill" style={{ width: "64%" }}></div>
               </div>
               <div className="continue-meta">
-                <span>64% completado</span>
+                <span>{t("continue.completed")}</span>
                 <span>·</span>
-                <span>9 min restantes</span>
+                <span>{t("continue.remaining")}</span>
               </div>
               <div className="continue-actions">
                 <button className="btn btn-primary" onClick={() => setView("practice")}>
-                  <Play /> Continuar lección
+                  <Play /> {t("continue.lessonBtn")}
                 </button>
                 <button className="btn btn-ghost">
-                  <ListMusic /> Ver plan del módulo
+                  <ListMusic /> {t("continue.planBtn")}
                 </button>
               </div>
             </div>
@@ -464,63 +477,63 @@ export default function AdminPage() {
             <div className="stat-card">
               <div className="stat-icon stat-icon-violet"><GraduationCap /></div>
               <div className="stat-num">7</div>
-              <div className="stat-label">Cursos completados</div>
+              <div className="stat-label">{t("stat.coursesCompleted")}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon stat-icon-blue"><CheckCheck /></div>
               <div className="stat-num">128</div>
-              <div className="stat-label">Lecciones realizadas</div>
+              <div className="stat-label">{t("stat.lessonsDone")}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon stat-icon-green"><Timer /></div>
               <div className="stat-num">34h 10m</div>
-              <div className="stat-label">Tiempo de práctica</div>
+              <div className="stat-label">{t("stat.practiceTime")}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon stat-icon-amber"><Flame /></div>
               <div className="stat-num">12</div>
-              <div className="stat-label">Días de racha</div>
+              <div className="stat-label">{t("stat.streakDays")}</div>
             </div>
           </section>
 
           <section className="two-col">
             <div className="panel">
               <div className="panel-head">
-                <h3><CalendarClock /> Próximas actividades</h3>
-                <button className="link-btn">Ver todas</button>
+                <h3><CalendarClock /> {t("activities.upcoming")}</h3>
+                <button className="link-btn">{t("activities.viewAll")}</button>
               </div>
               <ul className="activity-list">
                 <li className="activity-item">
                   <div className="activity-icon"><Piano /></div>
                   <div className="activity-body">
-                    <span className="activity-title">Escalas de Do mayor — 2 manos</span>
-                    <span className="activity-sub">Práctica guiada · 10 min</span>
+                    <span className="activity-title">{t("activity.scales")}</span>
+                    <span className="activity-sub">{t("activity.scalesSub")}</span>
                   </div>
-                  <span className="chip chip-blue">Hoy</span>
+                  <span className="chip chip-blue">{t("activity.today")}</span>
                 </li>
                 <li className="activity-item">
                   <div className="activity-icon"><Music4 /></div>
                   <div className="activity-body">
-                    <span className="activity-title">Teoría: círculo de quintas</span>
-                    <span className="activity-sub">Lección interactiva · 15 min</span>
+                    <span className="activity-title">{t("activity.theory")}</span>
+                    <span className="activity-sub">{t("activity.theorySub")}</span>
                   </div>
-                  <span className="chip chip-violet">Mañana</span>
+                  <span className="chip chip-violet">{t("activity.tomorrow")}</span>
                 </li>
                 <li className="activity-item">
                   <div className="activity-icon"><Mic2 /></div>
                   <div className="activity-body">
-                    <span className="activity-title">Grabación: &quot;Für Elise&quot; — compás 1–8</span>
-                    <span className="activity-sub">Evaluación de profesor · 20 min</span>
+                    <span className="activity-title">{t("activity.recording")}</span>
+                    <span className="activity-sub">{t("activity.recordingSub")}</span>
                   </div>
-                  <span className="chip chip-muted">Jueves</span>
+                  <span className="chip chip-muted">{t("activity.thursday")}</span>
                 </li>
               </ul>
             </div>
 
             <div className="panel">
               <div className="panel-head">
-                <h3><Target /> Racha semanal</h3>
-                <span className="panel-head-meta">5 / 7 días</span>
+                <h3><Target /> {t("streak.weekly")}</h3>
+                <span className="panel-head-meta">{t("streak.progress")}</span>
               </div>
               <div className="week-track">
                 {WEEK_DAYS.map((d, i) => (
@@ -532,7 +545,7 @@ export default function AdminPage() {
               </div>
               <div className="callout">
                 <Sparkles />
-                <p>Practica hoy para desbloquear la insignia <strong>Racha de 2 semanas</strong>.</p>
+                <p dangerouslySetInnerHTML={{ __html: t("streak.callout") }} />
               </div>
             </div>
           </section>
@@ -542,18 +555,18 @@ export default function AdminPage() {
         <main className={`view ${view === "practice" ? "is-active" : ""}`}>
           <section className="practice-head">
             <div>
-              <span className="eyebrow"><Disc3 /> Módulo 3 · Armonía básica</span>
-              <h2>Acordes mayores con inversión</h2>
+              <span className="eyebrow"><Disc3 /> {t("continue.module")}</span>
+              <h2>{t("continue.lesson")}</h2>
             </div>
             <div className="practice-controls">
               <div className="tempo-control">
-                <span>Tempo</span>
-                <button className="icon-btn ghost" onClick={tempoDown} aria-label="Bajar tempo"><Minus /></button>
+                <span>{t("practice.tempo")}</span>
+                <button className="icon-btn ghost" onClick={tempoDown} aria-label={t("practice.tempoDown")}><Minus /></button>
                 <span className="tempo-value">{bpm} BPM</span>
-                <button className="icon-btn ghost" onClick={tempoUp} aria-label="Subir tempo"><Plus /></button>
+                <button className="icon-btn ghost" onClick={tempoUp} aria-label={t("practice.tempoUp")}><Plus /></button>
               </div>
               <button className={`btn ${metroBtnOn ? "btn-primary" : "btn-ghost"}`} onClick={toggleMetronome}>
-                {metroBtnOn ? <><Square /> Detener</> : <><Activity /> Metrónomo</>}
+                {metroBtnOn ? <><Square /> {t("practice.stop")}</> : <><Activity /> {t("practice.metronome")}</>}
               </button>
             </div>
           </section>
@@ -561,11 +574,11 @@ export default function AdminPage() {
           <section className="practice-grid">
             <div className="panel note-panel">
               <div className="panel-head">
-                <h3><Ear /> Toca la nota indicada</h3>
-                <span className="chip chip-green">Racha: {correctStreak} correctas</span>
+                <h3><Ear /> {t("practice.targetNote")}</h3>
+                <span className="chip chip-green">{t("practice.streakLabel", { count: correctStreak })}</span>
               </div>
               <div className="note-target">
-                <span className="note-target-label">Nota objetivo</span>
+                <span className="note-target-label">{t("practice.targetLabel")}</span>
                 <span className="note-target-value">{PIANO_KEYS[targetIndex].label} ({PIANO_KEYS[targetIndex].note})</span>
               </div>
               <div className={`feedback-row ${feedbackCorrect ? "is-correct" : ""}`} aria-live="polite">
@@ -576,7 +589,7 @@ export default function AdminPage() {
 
             <div className="panel waveform-panel">
               <div className="panel-head">
-                <h3><AudioLines /> Monitor de práctica</h3>
+                <h3><AudioLines /> {t("practice.monitor")}</h3>
               </div>
               <div className="waveform" aria-hidden="true">
                 {waveHeights.map((h, i) => (
@@ -584,18 +597,18 @@ export default function AdminPage() {
                 ))}
               </div>
               <div className="waveform-meta">
-                <span><Clock /> 09:42 de práctica hoy</span>
-                <span><BadgeCheck /> 91% precisión</span>
+                <span><Clock /> {t("practice.practiceToday", { time: "09:42" })}</span>
+                <span><BadgeCheck /> {t("practice.precision", { pct: 91 })}</span>
               </div>
             </div>
           </section>
 
           <section className="panel piano-panel">
             <div className="panel-head">
-              <h3><Piano /> Teclado interactivo</h3>
-              <span className="panel-head-meta">Haz clic o usa tu teclado — A S D F G H J</span>
+              <h3><Piano /> {t("practice.interactivePiano")}</h3>
+              <span className="panel-head-meta">{t("practice.pianoHint")}</span>
             </div>
-            <div className="piano" aria-label="Piano interactivo">
+            <div className="piano" aria-label={t("practice.pianoAria")}>
               {PIANO_KEYS.filter((k) => k.type === "white").map((key) => (
                 <div
                   key={key.note}
@@ -630,7 +643,7 @@ export default function AdminPage() {
                 <article key={i} className="course-card">
                   <div className={`course-cover ${c.coverClass}`}>
                     <IconComp />
-                    <span className="course-level">{c.level}</span>
+                    <span className="course-level">{t(c.level)}</span>
                     {c.locked && <span className="course-lock"><Lock /></span>}
                   </div>
                   <div className="course-body">
@@ -642,7 +655,7 @@ export default function AdminPage() {
                     </div>
                     <button className={`btn ${c.locked ? "btn-ghost" : "btn-primary"}`} disabled={c.locked} style={c.locked ? { opacity: 0.55, cursor: "not-allowed" } : undefined}>
                       {c.locked ? <Lock /> : c.progress > 0 ? <Play /> : <Sparkles />}
-                      {c.locked ? "Bloqueado" : c.progress > 0 ? "Continuar" : "Empezar"}
+                      {c.locked ? t("courses.locked") : c.progress > 0 ? t("courses.continue") : t("courses.start")}
                     </button>
                   </div>
                 </article>
@@ -656,7 +669,7 @@ export default function AdminPage() {
           <section className="two-col">
             <div className="panel">
               <div className="panel-head">
-                <h3><BarChart3 /> Minutos de práctica — últimas 7 semanas</h3>
+                <h3><BarChart3 /> {t("progress.practiceMinutes")}</h3>
               </div>
               <div className="bar-chart">
                 {WEEKS_DATA.map((w, i) => (
@@ -669,21 +682,21 @@ export default function AdminPage() {
             </div>
             <div className="panel">
               <div className="panel-head">
-                <h3><Grid3x3 /> Constancia — últimos 84 días</h3>
+                <h3><Grid3x3 /> {t("progress.consistency")}</h3>
               </div>
               <div className="heatmap">
                 {heatmapCells.map((level, i) => (
-                  <div key={i} className={`heat-cell h${level}`} title={`Nivel de práctica ${level}/4`} />
+                  <div key={i} className={`heat-cell h${level}`} title={t("progress.level", { level })} />
                 ))}
               </div>
               <div className="heatmap-legend">
-                <span>Menos</span>
+                <span>{t("progress.less")}</span>
                 <div className="heat-swatch h0"></div>
                 <div className="heat-swatch h1"></div>
                 <div className="heat-swatch h2"></div>
                 <div className="heat-swatch h3"></div>
                 <div className="heat-swatch h4"></div>
-                <span>Más</span>
+                <span>{t("progress.more")}</span>
               </div>
             </div>
           </section>
@@ -692,22 +705,22 @@ export default function AdminPage() {
             <div className="stat-card">
               <div className="stat-icon stat-icon-violet"><Trophy /></div>
               <div className="stat-num">14</div>
-              <div className="stat-label">Insignias obtenidas</div>
+              <div className="stat-label">{t("progress.badges")}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon stat-icon-blue"><TrendingUp /></div>
               <div className="stat-num">+18%</div>
-              <div className="stat-label">Precisión vs. mes anterior</div>
+              <div className="stat-label">{t("progress.precisionVsLastMonth")}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon stat-icon-green"><CalendarCheck2 /></div>
               <div className="stat-num">21</div>
-              <div className="stat-label">Racha más larga (días)</div>
+              <div className="stat-label">{t("progress.longestStreak")}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon stat-icon-amber"><Star /></div>
               <div className="stat-num">4.8</div>
-              <div className="stat-label">Evaluación media del profesor</div>
+              <div className="stat-label">{t("progress.teacherRating")}</div>
             </div>
           </section>
         </main>
@@ -718,34 +731,34 @@ export default function AdminPage() {
             <div className="stat-card">
               <div className="stat-icon stat-icon-violet"><Users /></div>
               <div className="stat-num">3,482</div>
-              <div className="stat-label">Estudiantes activos</div>
+              <div className="stat-label">{t("admin.activeStudents")}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon stat-icon-blue"><LibraryBig /></div>
               <div className="stat-num">46</div>
-              <div className="stat-label">Cursos publicados</div>
+              <div className="stat-label">{t("admin.publishedCourses")}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon stat-icon-green"><Server /></div>
               <div className="stat-num">99.98%</div>
-              <div className="stat-label">Disponibilidad de plataforma</div>
+              <div className="stat-label">{t("admin.platformUptime")}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon stat-icon-amber"><Ticket /></div>
               <div className="stat-num">7</div>
-              <div className="stat-label">Solicitudes de soporte abiertas</div>
+              <div className="stat-label">{t("admin.openTickets")}</div>
             </div>
           </section>
 
           <section className="two-col">
             <div className="panel">
               <div className="panel-head">
-                <h3><UserRound /> Estudiantes recientes</h3>
-                <button className="link-btn">Ver todos</button>
+                <h3><UserRound /> {t("admin.recentStudents")}</h3>
+                <button className="link-btn">{t("admin.viewAll")}</button>
               </div>
               <table className="data-table">
                 <thead>
-                  <tr><th>Estudiante</th><th>Curso</th><th>Progreso</th><th>Estado</th></tr>
+                  <tr><th>{t("admin.tableStudent")}</th><th>{t("admin.tableCourse")}</th><th>{t("admin.tableProgress")}</th><th>{t("admin.tableStatus")}</th></tr>
                 </thead>
                 <tbody>
                   {ADMIN_STUDENTS.map((s, i) => (
@@ -760,7 +773,7 @@ export default function AdminPage() {
                       <td>
                         <div className="mini-progress"><div className="mini-progress-fill" style={{ width: `${s.progress}%` }}></div></div>
                       </td>
-                      <td><span className={`status-dot ${s.status}`}>{s.statusLabel}</span></td>
+                      <td><span className={`status-dot ${s.status}`}>{s.status === "idle" ? t(s.statusLabel, { days: s.idleDays ?? 0 }) : t(s.statusLabel)}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -769,28 +782,28 @@ export default function AdminPage() {
 
             <div className="panel">
               <div className="panel-head">
-                <h3><Megaphone /> Estado del contenido</h3>
+                <h3><Megaphone /> {t("admin.contentStatus")}</h3>
               </div>
               <ul className="content-status-list">
                 <li>
                   <div className="content-status-icon status-live"><CheckCircle2 /></div>
                   <div className="activity-body">
-                    <span className="activity-title">Módulo 4 · Ritmo y compás</span>
-                    <span className="activity-sub">Publicado — 12 lecciones</span>
+                    <span className="activity-title">{t("admin.module4")}</span>
+                    <span className="activity-sub">{t("admin.module4Sub")}</span>
                   </div>
                 </li>
                 <li>
                   <div className="content-status-icon status-review"><Clock4 /></div>
                   <div className="activity-body">
-                    <span className="activity-title">Módulo 5 · Improvisación básica</span>
-                    <span className="activity-sub">En revisión editorial</span>
+                    <span className="activity-title">{t("admin.module5")}</span>
+                    <span className="activity-sub">{t("admin.module5Sub")}</span>
                   </div>
                 </li>
                 <li>
                   <div className="content-status-icon status-draft"><PencilLine /></div>
                   <div className="activity-body">
-                    <span className="activity-title">Curso · Piano jazz para principiantes</span>
-                    <span className="activity-sub">Borrador — 3 lecciones</span>
+                    <span className="activity-title">{t("admin.courseJazz")}</span>
+                    <span className="activity-sub">{t("admin.courseJazzSub")}</span>
                   </div>
                 </li>
               </ul>

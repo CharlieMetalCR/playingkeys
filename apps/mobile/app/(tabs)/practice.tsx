@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Minus, Plus, Activity, CheckCircle, XCircle, Zap, Clock, Target } from 'lucide-react-native';
 import { usePianoAudio } from '../../hooks/usePianoAudio';
+import { useMetronome } from '../../hooks/useMetronome';
+import { useTranslation } from '../../i18n';
 
 const ALL_NOTES: { note: string; freq: number; isBlack: boolean }[] = [
   { note: 'C4', freq: 261.63, isBlack: false },
@@ -35,6 +37,7 @@ function pickRandomTarget(): string {
 }
 
 export default function PracticeScreen() {
+  const { t } = useTranslation();
   const [bpm, setBpm] = useState(100);
   const [metronomeOn, setMetronomeOn] = useState(false);
   const [activeNote, setActiveNote] = useState<string | null>(null);
@@ -48,6 +51,7 @@ export default function PracticeScreen() {
   const [waveHeights, setWaveHeights] = useState(() => Array.from({ length: 30 }, () => 10 + Math.random() * 80));
 
   const { playNote, cleanup } = usePianoAudio();
+  const metronome = useMetronome();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -63,6 +67,20 @@ export default function PracticeScreen() {
       setWaveHeights(Array.from({ length: 30 }, () => 10 + Math.random() * 80));
     }
   }, [activeNote]);
+
+  useEffect(() => {
+    if (metronomeOn) {
+      metronome.start(bpm);
+    } else {
+      metronome.stop();
+    }
+  }, [metronomeOn, bpm, metronome]);
+
+  useEffect(() => {
+    return () => {
+      metronome.stop();
+    };
+  }, [metronome]);
 
   const handlePress = useCallback(
     (note: string, freq: number) => {
@@ -105,7 +123,7 @@ export default function PracticeScreen() {
         </View>
         <View style={styles.controls}>
           <View style={styles.tempoControl}>
-            <Text style={styles.tempoLabel}>BPM</Text>
+            <Text style={styles.tempoLabel}>{t('practice.tempo')}</Text>
             <Pressable style={styles.tempoBtn} onPress={() => setBpm((b) => Math.max(40, b - 5))}>
               <Minus size={14} color="#9CA3AF" />
             </Pressable>
@@ -125,18 +143,18 @@ export default function PracticeScreen() {
 
       <View style={styles.topRow}>
         <View style={styles.noteTargetPanel}>
-          <Text style={styles.targetLabel}>Nota objetivo</Text>
+          <Text style={styles.targetLabel}>{t('practice.target')}</Text>
           <Text style={styles.targetValue}>{targetNote.replace('4', '')}</Text>
           <View style={[styles.feedbackRow, feedback === FEEDBACK_CORRECT && styles.feedbackCorrect, feedback === FEEDBACK_WRONG && styles.feedbackWrong]}>
             {feedback === FEEDBACK_CORRECT && <CheckCircle size={16} color="#22C55E" />}
             {feedback === FEEDBACK_WRONG && <XCircle size={16} color="#EF4444" />}
             <Text style={[styles.feedbackText, feedback === FEEDBACK_CORRECT && { color: '#22C55E' }, feedback === FEEDBACK_WRONG && { color: '#EF4444' }]}>
-              {feedback === FEEDBACK_CORRECT ? '¡Correcto!' : feedback === FEEDBACK_WRONG ? 'Incorrecto' : 'Toca la nota'}
+              {feedback === FEEDBACK_CORRECT ? t('practice.correct') : feedback === FEEDBACK_WRONG ? t('practice.wrong') : t('practice.play')}
             </Text>
           </View>
           <View style={styles.streakRow}>
             <Zap size={14} color="#FBBF24" />
-            <Text style={styles.streakText}>{streak} racha</Text>
+            <Text style={styles.streakText}>{streak} {t('practice.streak')}</Text>
           </View>
         </View>
 
@@ -149,7 +167,7 @@ export default function PracticeScreen() {
           </View>
           <View style={styles.monitorMeta}>
             <Text style={styles.monitorMetaText}>{formatTime(practiceSeconds)}</Text>
-            <Text style={styles.monitorMetaText}>{accuracy}% accuracy</Text>
+            <Text style={styles.monitorMetaText}>{accuracy}% {t('practice.accuracy')}</Text>
           </View>
         </View>
       </View>

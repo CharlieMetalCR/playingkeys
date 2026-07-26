@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { BookOpen, ChevronRight, AlertCircle, RefreshCw } from 'lucide-react-native';
 import { fetchUnits, ApiUnit } from '../../lib/api';
+import { useTranslation } from '../../i18n';
 
 const GRADIENTS = [
   ['#7C3AED', '#3730A3'],
@@ -14,6 +15,7 @@ const GRADIENTS = [
 ];
 
 export default function CoursesScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [units, setUnits] = useState<ApiUnit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +41,7 @@ export default function CoursesScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#7C3AED" />
-        <Text style={styles.loadingText}>Cargando cursos...</Text>
+        <Text style={styles.loadingText}>{t('courses.loading')}</Text>
       </View>
     );
   }
@@ -60,7 +62,7 @@ export default function CoursesScreen() {
   if (units.length === 0) {
     return (
       <View style={styles.center}>
-        <Text style={styles.emptyText}>No hay cursos disponibles</Text>
+        <Text style={styles.emptyText}>{t('courses.noUnits')}</Text>
       </View>
     );
   }
@@ -81,7 +83,7 @@ export default function CoursesScreen() {
             <View style={[styles.courseCover, { backgroundColor: colors[0] }]}>
               <BookOpen size={28} color="rgba(255,255,255,.85)" />
               <View style={styles.courseBadge}>
-                <Text style={styles.courseBadgeText}>UNIDAD {unit.number}</Text>
+                <Text style={styles.courseBadgeText}>{t('courses.units')} {unit.number}</Text>
               </View>
             </View>
             <View style={styles.courseBody}>
@@ -90,7 +92,7 @@ export default function CoursesScreen() {
                 <Text style={styles.courseDesc} numberOfLines={2}>{unit.description}</Text>
               ) : null}
               <View style={styles.courseFooter}>
-                <Text style={styles.lessonCount}>{lessons.length} lecciones</Text>
+                <Text style={styles.lessonCount}>{t('courses.lessonsCount', { count: lessons.length })}</Text>
                 <ChevronRight size={16} color="#6B7686" style={{ transform: [{ rotate: isExpanded ? '90deg' : '0deg' }] }} />
               </View>
             </View>

@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Award, Target, Flame, Star } from 'lucide-react-native';
+import { useTranslation } from '../../i18n';
 
 const WEEKS = [
   { label: 'S1', values: [3, 5, 2, 6, 4, 1, 5] },
@@ -26,10 +27,11 @@ function heatColor(level: number) {
 const barMax = Math.max(...WEEKS.flatMap((w) => w.values));
 
 export default function ProgressScreen() {
+  const { t } = useTranslation();
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Práctica semanal</Text>
+        <Text style={styles.sectionTitle}>{t('progress.weeklyTitle')}</Text>
         <View style={styles.barChart}>
           {WEEKS.map((week, wi) => (
             <View key={wi} style={styles.barCol}>
@@ -43,7 +45,7 @@ export default function ProgressScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Mapa de calor</Text>
+        <Text style={styles.sectionTitle}>{t('progress.historyTitle')}</Text>
         <View style={styles.heatmap}>
           {HEAT_DATA.map((level, i) => (
             <View key={i} style={[styles.heatCell, { backgroundColor: heatColor(level) }]} />
@@ -64,21 +66,21 @@ export default function ProgressScreen() {
             <Award size={18} color="#C4B5FD" />
           </View>
           <Text style={styles.statValue}>5</Text>
-          <Text style={styles.statLabel}>Insignias</Text>
+          <Text style={styles.statLabel}>{t('progress.completed')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(56,189,248,.14)' }]}>
             <Target size={18} color="#38BDF8" />
           </View>
           <Text style={styles.statValue}>87%</Text>
-          <Text style={styles.statLabel}>Precisión</Text>
+          <Text style={styles.statLabel}>{t('progress.avgScore')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(245,158,11,.16)' }]}>
             <Flame size={18} color="#FBBF24" />
           </View>
           <Text style={styles.statValue}>14</Text>
-          <Text style={styles.statLabel}>Racha más larga</Text>
+          <Text style={styles.statLabel}>{t('progress.streak')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(34,197,94,.14)' }]}>

@@ -2,7 +2,10 @@ import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, Play, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react-native';
 import { useState, useEffect, useCallback } from 'react';
-import { fetchLesson, ApiLesson } from '../../lib/api';
+import { fetchLesson, createProgress, ApiLesson } from '../../lib/api';
+import { useTranslation } from '../../i18n';
+
+const DEMO_STUDENT_ID = '66397b72-6376-438c-8abd-08013af8d29b';
 
 const NOTES_FULL: { note: string; freq: number; isBlack: boolean }[] = [
   { note: 'C4', freq: 261.63, isBlack: false },
@@ -23,9 +26,11 @@ export default function LessonDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [completed, setCompleted] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const [lesson, setLesson] = useState<ApiLesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -43,15 +48,29 @@ export default function LessonDetailScreen() {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleComplete = useCallback(() => {
-    setCompleted(true);
-  }, []);
+  const handleComplete = useCallback(async () => {
+    if (!id || completing) return;
+    try {
+      setCompleting(true);
+      await createProgress({
+        studentId: DEMO_STUDENT_ID,
+        lessonId: id,
+        status: 'COMPLETED',
+        score: 100,
+      });
+      setCompleted(true);
+    } catch {
+      setCompleted(true);
+    } finally {
+      setCompleting(false);
+    }
+  }, [id, completing]);
 
   if (loading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#7C3AED" />
-        <Text style={styles.loadingText}>Cargando lección...</Text>
+        <Text style={styles.loadingText}>{t('lesson.loading')}</Text>
       </View>
     );
   }
@@ -60,20 +79,20 @@ export default function LessonDetailScreen() {
     return (
       <View style={styles.center}>
         <AlertCircle size={40} color="#EF4444" />
-        <Text style={styles.errorText}>{error ?? 'Lección no encontrada'}</Text>
+        <Text style={styles.errorText}>{error ?? t('lesson.notFound')}</Text>
         <Pressable style={styles.retryBtn} onPress={load}>
           <RefreshCw size={16} color="#fff" />
-          <Text style={styles.retryText}>Reintentar</Text>
+          <Text style={styles.retryText}>{t('lesson.retry')}</Text>
         </Pressable>
         <Pressable style={[styles.retryBtn, { backgroundColor: '#273244', marginTop: 8 }]} onPress={() => router.back()}>
-          <Text style={styles.retryText}>Volver</Text>
+          <Text style={styles.retryText}>{t('lesson.back')}</Text>
         </Pressable>
       </View>
     );
   }
 
   const unitLabel = lesson.unit
-    ? `Unidad ${lesson.unit.number}: ${lesson.unit.title}`
+    ? t('lesson.unit', { number: lesson.unit.number, title: lesson.unit.title })
     : `Lección ${lesson.number}`;
   const instructions = lesson.content.instructions ?? lesson.content.description ?? '';
 
@@ -81,7 +100,7 @@ export default function LessonDetailScreen() {
     <ScrollView style={styles.container}>
       <Pressable style={styles.backButton} onPress={() => router.back()}>
         <ArrowLeft size={20} color="#C4B5FD" />
-        <Text style={styles.backText}>Volver</Text>
+        <Text style={styles.backText}>{t('lesson.back')}</Text>
       </Pressable>
 
       <View style={styles.header}>
@@ -94,14 +113,14 @@ export default function LessonDetailScreen() {
 
       {instructions ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Instrucciones</Text>
+          <Text style={styles.sectionTitle}>{t('lesson.instructions')}</Text>
           <Text style={styles.instructions}>{instructions}</Text>
         </View>
       ) : null}
 
       {lesson.content.keySignature ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Armagura</Text>
+          <Text style={styles.sectionTitle}>{t('lesson.keySignature')}</Text>
           <View style={styles.chip}>
             <Text style={styles.chipText}>{lesson.content.keySignature}</Text>
           </View>
@@ -110,7 +129,7 @@ export default function LessonDetailScreen() {
 
       {lesson.content.fingering ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Digitación</Text>
+          <Text style={styles.sectionTitle}>{t('lesson.fingering')}</Text>
           <View style={styles.chip}>
             <Text style={styles.chipText}>{lesson.content.fingering}</Text>
           </View>
@@ -119,7 +138,7 @@ export default function LessonDetailScreen() {
 
       {lesson.content.dynamics ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Dinámica</Text>
+          <Text style={styles.sectionTitle}>{t('lesson.dynamics')}</Text>
           <View style={styles.chip}>
             <Text style={styles.chipText}>{lesson.content.dynamics}</Text>
           </View>
@@ -127,7 +146,7 @@ export default function LessonDetailScreen() {
       ) : null}
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Piano de práctica</Text>
+        <Text style={styles.sectionTitle}>{t('lesson.practicePiano')}</Text>
         <View style={styles.pianoMini}>
           {NOTES_FULL.filter((n) => !n.isBlack).map((n) => (
             <View key={n.note} style={styles.miniWhiteKey}>
@@ -140,16 +159,19 @@ export default function LessonDetailScreen() {
       <Pressable
         style={[styles.completeBtn, completed && styles.completeBtnDone]}
         onPress={handleComplete}
+        disabled={completed || completing}
       >
-        {completed ? (
+        {completing ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : completed ? (
           <>
             <CheckCircle size={20} color="#fff" />
-            <Text style={styles.completeText}>¡Completada!</Text>
+            <Text style={styles.completeText}>{t('lesson.completed')}</Text>
           </>
         ) : (
           <>
             <Play size={20} color="#fff" />
-            <Text style={styles.completeText}>Marcar como completada</Text>
+            <Text style={styles.completeText}>{t('lesson.markComplete')}</Text>
           </>
         )}
       </Pressable>
