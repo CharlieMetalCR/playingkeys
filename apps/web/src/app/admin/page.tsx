@@ -160,13 +160,15 @@ function getViewMeta(t: (key: string) => string): Record<ViewId, { title: string
 export default function AdminPage() {
   const { t, locale, setLocale } = useTranslation();
   const { user, loading: authLoading, login, logout } = useWebAuth();
+  const isAdmin = user?.role === "ADMIN";
+  const isTeacher = user?.role === "TEACHER";
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [view, setViewState] = useState<ViewId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [demoIsAdmin, setDemoIsAdmin] = useState(false);
   const [bpm, setBpm] = useState(72);
   const [metroBtnOn, setMetroBtnOn] = useState(false);
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
@@ -279,7 +281,7 @@ export default function AdminPage() {
   }, []);
 
   const toggleRole = useCallback(() => {
-    setIsAdmin((prev) => {
+    setDemoIsAdmin((prev) => {
       if (prev) setViewState("dashboard");
       return !prev;
     });
@@ -457,18 +459,23 @@ export default function AdminPage() {
           <button className={`nav-item ${view === "progress" ? "is-active" : ""}`} onClick={() => setView("progress")}>
             <ChartNoAxesCombined /><span>{t("nav.progress")}</span>
           </button>
-          {isAdmin && <div className="nav-divider" />}
-          {isAdmin && (
+          {demoIsAdmin && <div className="nav-divider" />}
+          {demoIsAdmin && (
             <button className={`nav-item ${view === "admin" ? "is-active" : ""}`} onClick={() => setView("admin")}>
               <ShieldHalf /><span>{t("nav.admin")}</span>
             </button>
+          )}
+          {isTeacher && (
+            <a href="/teacher" className="nav-item" style={{ textDecoration: "none" }}>
+              <Users /><span>{t("nav.teacher")}</span>
+            </a>
           )}
         </nav>
 
         <div className="sidebar-bottom">
           <button className="role-switch" onClick={toggleRole} title={t("role.switchTitle")}>
             <Repeat />
-            <span>{isAdmin ? t("role.student") : t("role.admin")}</span>
+            <span>{demoIsAdmin ? t("role.student") : t("role.admin")}</span>
           </button>
           <div className="user-card">
             <div className="avatar avatar-md" style={{ "--h": "265" } as React.CSSProperties}>{user!.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}</div>

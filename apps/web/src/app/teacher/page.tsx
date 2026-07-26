@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "../../i18n";
 import { useWebAuth } from "../../hooks/useWebAuth";
-import { Users, BookOpen, TrendingUp, Search, Menu, Bell, Flame, Settings2, PanelLeftClose, LogOut, User } from "lucide-react";
+import { Users, BookOpen, TrendingUp, Search, Menu, Bell, Flame, Settings2, PanelLeftClose, LogOut, User, ShieldHalf } from "lucide-react";
 
 const API_BASE = "http://localhost:3001/api";
 
@@ -170,6 +170,9 @@ export default function TeacherPage() {
           <div className="nav-item is-active">
             <Users /><span>{t("nav.teacher")}</span>
           </div>
+          <a href="/admin" className="nav-item" style={{ textDecoration: "none" }}>
+            <ShieldHalf /><span>{t("nav.admin")}</span>
+          </a>
         </nav>
 
         <div className="sidebar-bottom">
