@@ -1538,56 +1538,6 @@ async function main() {
     }),
   ]);
 
-  // ─── Sample Users ─────────────────────────────────────────────────────
-  const teacherUser = await prisma.user.create({
-    data: {
-      email: 'teacher@playingkeys.com',
-      name: 'Sample Teacher',
-      password: 'hashed-password-here',
-      role: 'TEACHER',
-    },
-  });
-
-  const adminUser = await prisma.user.create({
-    data: {
-      email: 'admin@playingkeys.com',
-      name: 'Admin User',
-      password: 'hashed-password-here',
-      role: 'ADMIN',
-    },
-  });
-
-  await prisma.teacher.create({
-    data: {
-      userId: teacherUser.id,
-      bio: 'Experienced piano teacher with 10+ years of teaching',
-    },
-  });
-
-  await prisma.admin.create({
-    data: {
-      userId: adminUser.id,
-    },
-  });
-
-  const studentUser = await prisma.user.create({
-    data: {
-      email: 'student@playingkeys.com',
-      name: 'Demo Student',
-      password: 'hashed-password-here',
-      role: 'STUDENT',
-    },
-  });
-
-  await prisma.student.create({
-    data: {
-      userId: studentUser.id,
-      teacherId: (await prisma.teacher.findFirst())!.id,
-    },
-  });
-
-  console.log(`Student user: student@playingkeys.com (id: ${studentUser.id})`);
-
   // ─── Summary ──────────────────────────────────────────────────────────
   const totalLessons =
     unit1Lessons.length +
@@ -1626,7 +1576,7 @@ async function main() {
     { email: 'nadia@playingkeys.com', name: 'Nadia Ayala' },
   ];
 
-  const students = [];
+  const students: { id: string; userId: string }[] = [];
   for (const [i, s] of studentData.entries()) {
     const user = await prisma.user.create({
       data: { email: s.email, name: s.name, password: hashedPassword, role: 'STUDENT' },
