@@ -126,5 +126,13 @@
   "lesson.dynamics": "Dynamics",
   "lesson.back": "Back",
   "lesson.loading": "Loading lesson...",
-  "lesson.notFound": "Lesson not found"
+  "lesson.notFound": "Lesson not found",
+
+  "auth.login": "Sign in",
+  "auth.email": "Email",
+  "auth.password": "Password",
+  "auth.adminLogin": "Admin panel access",
+  "auth.error": "Invalid credentials",
+  "auth.loading": "Loading...",
+  "auth.logout": "Sign out"
 }

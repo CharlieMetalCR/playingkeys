@@ -76,15 +76,15 @@
 
 ### Story 4.1: Admin student management
 **As** an admin, **I want** to view, create, edit students.
-**Status:** UI table exists. Need CRUD endpoints.
+**Status:** Done. StudentModule CRUD. GET public, mutations admin-only (JWT+Roles). Admin web fetches real students.
 
 ### Story 4.2: Admin teacher management
 **As** an admin, **I want** to manage teachers and assign students.
-**Status:** UI cards exist. Need CRUD endpoints.
+**Status:** Done. TeacherModule CRUD. GET public, mutations admin-only.
 
 ### Story 4.3: Payment tracking
 **As** an admin, **I want** to track student payments and due dates.
-**Status:** UI table exists. Need Payment CRUD + integration.
+**Status:** Done. PaymentModule CRUD + findByStudent. GET public, mutations admin-only.
 
 ---
 

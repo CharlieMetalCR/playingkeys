@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "../../i18n";
+import { useWebAuth } from "../../hooks/useWebAuth";
 import {
   LayoutGrid,
   Piano,
@@ -158,6 +159,11 @@ function getViewMeta(t: (key: string) => string): Record<ViewId, { title: string
 
 export default function AdminPage() {
   const { t, locale, setLocale } = useTranslation();
+  const { user, loading: authLoading, login, logout } = useWebAuth();
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
   const [view, setViewState] = useState<ViewId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -450,12 +456,12 @@ export default function AdminPage() {
             <span>{isAdmin ? t("role.student") : t("role.admin")}</span>
           </button>
           <div className="user-card">
-            <div className="avatar avatar-md" style={{ "--h": "265" } as React.CSSProperties}>SL</div>
+            <div className="avatar avatar-md" style={{ "--h": "265" } as React.CSSProperties}>{user!.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}</div>
             <div className="user-meta">
-              <span className="user-name">Sofía Larios</span>
-              <span className="user-plan">{t("user.plan")}</span>
+              <span className="user-name">{user!.name}</span>
+              <span className="user-plan">{user!.role}</span>
             </div>
-            <button className="icon-btn ghost" aria-label={t("user.settings")}>
+            <button className="icon-btn ghost" onClick={logout} aria-label={t("auth.logout")} title={t("auth.logout")}>
               <Settings2 />
             </button>
           </div>
@@ -750,7 +756,61 @@ export default function AdminPage() {
                 const IconComp = c.icon;
                 const unit = courseUnits[i];
                 const isExpanded = expandedUnitId === unit?.id;
-                return (
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginError("");
+    try {
+      await login(loginEmail, loginPassword);
+    } catch {
+      setLoginError(t("auth.error"));
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  if (authLoading) {
+    return <div className="app-shell" style={{ justifyContent: "center", alignItems: "center" }}><p style={{ color: "#9CA3AF" }}>{t("auth.loading")}</p></div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="app-shell" style={{ justifyContent: "center", alignItems: "center" }}>
+        <form onSubmit={handleLogin} style={{ background: "#1A2233", border: "1px solid #273244", borderRadius: 16, padding: 32, width: 360 }}>
+          <h2 style={{ color: "#F9FAFB", fontSize: 22, fontWeight: 700, marginBottom: 4, textAlign: "center" }}>PlayingKeys</h2>
+          <p style={{ color: "#9CA3AF", fontSize: 13, marginBottom: 24, textAlign: "center" }}>{t("auth.adminLogin")}</p>
+          {loginError && <p style={{ color: "#EF4444", fontSize: 13, marginBottom: 12 }}>{loginError}</p>}
+          <label style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>{t("auth.email")}</label>
+          <input
+            type="email"
+            value={loginEmail}
+            onChange={(e) => setLoginEmail(e.target.value)}
+            placeholder="admin@playingkeys.com"
+            style={{ width: "100%", background: "#111827", border: "1px solid #273244", borderRadius: 8, padding: "10px 12px", color: "#F9FAFB", fontSize: 14, marginTop: 6, marginBottom: 16, boxSizing: "border-box" as const }}
+            required
+          />
+          <label style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>{t("auth.password")}</label>
+          <input
+            type="password"
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            placeholder="••••••"
+            style={{ width: "100%", background: "#111827", border: "1px solid #273244", borderRadius: 8, padding: "10px 12px", color: "#F9FAFB", fontSize: 14, marginTop: 6, marginBottom: 20, boxSizing: "border-box" as const }}
+            required
+          />
+          <button
+            type="submit"
+            disabled={loginLoading}
+            style={{ width: "100%", background: "#7C3AED", border: "none", borderRadius: 999, padding: "12px 0", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", opacity: loginLoading ? 0.6 : 1 }}
+          >
+            {loginLoading ? "..." : t("auth.login")}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
                   <article key={i} className="course-card">
                     <div className={`course-cover ${c.coverClass}`}>
                       <IconComp />

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import * as bcrypt from 'bcryptjs';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -1599,9 +1600,73 @@ async function main() {
     unit8Lessons.length +
     unit9Lessons.length;
 
+  // ─── Users, Teachers, Students ────────────────────────────────────────
+  const hashedPassword = await bcrypt.hash('password123', 10);
+
+  const adminUser = await prisma.user.create({
+    data: { email: 'admin@playingkeys.com', name: 'Admin PK', password: hashedPassword, role: 'ADMIN' },
+  });
+  await prisma.admin.create({ data: { userId: adminUser.id } });
+
+  const teacherUser1 = await prisma.user.create({
+    data: { email: 'profesor@playingkeys.com', name: 'María García', password: hashedPassword, role: 'TEACHER' },
+  });
+  const teacher1 = await prisma.teacher.create({ data: { userId: teacherUser1.id, bio: 'Pianista clásica con 15 años de experiencia' } });
+
+  const teacherUser2 = await prisma.user.create({
+    data: { email: 'profesor2@playingkeys.com', name: 'Carlos López', password: hashedPassword, role: 'TEACHER' },
+  });
+  const teacher2 = await prisma.teacher.create({ data: { userId: teacherUser2.id, bio: 'Especialista en jazz y música contemporánea' } });
+
+  const studentData = [
+    { email: 'sofia@playingkeys.com', name: 'Sofía Larios' },
+    { email: 'mateo@playingkeys.com', name: 'Mateo Pineda' },
+    { email: 'lucia@playingkeys.com', name: 'Lucía Ramírez' },
+    { email: 'julian@playingkeys.com', name: 'Julián Gómez' },
+    { email: 'nadia@playingkeys.com', name: 'Nadia Ayala' },
+  ];
+
+  const students = [];
+  for (const [i, s] of studentData.entries()) {
+    const user = await prisma.user.create({
+      data: { email: s.email, name: s.name, password: hashedPassword, role: 'STUDENT' },
+    });
+    const student = await prisma.student.create({
+      data: {
+        userId: user.id,
+        teacherId: i % 2 === 0 ? teacher1.id : teacher2.id,
+        phone: `+52 55 000${String(i + 1).padStart(3, '0')}`,
+      },
+    });
+    students.push(student);
+  }
+
+  // Seed some progress for the first student
+  if (students.length > 0 && unit1Lessons.length > 0) {
+    await prisma.progress.create({
+      data: { studentId: students[0].id, lessonId: unit1Lessons[0].id, status: 'COMPLETED', score: 95, completedAt: new Date() },
+    });
+    if (unit1Lessons.length > 1) {
+      await prisma.progress.create({
+        data: { studentId: students[0].id, lessonId: unit1Lessons[1].id, status: 'COMPLETED', score: 88, completedAt: new Date() },
+      });
+    }
+  }
+
+  // Seed a payment
+  if (students.length > 0) {
+    await prisma.payment.create({
+      data: { studentId: students[0].id, amount: 1200, currency: 'USD', status: 'PAID', dueDate: new Date(), paidAt: new Date() },
+    });
+    await prisma.payment.create({
+      data: { studentId: students[1].id, amount: 1200, currency: 'USD', status: 'PENDING', dueDate: new Date(Date.now() + 7 * 86400000) },
+    });
+  }
+
   console.log('Seed data created successfully!');
   console.log(`Created ${units.length} units`);
   console.log(`Created ${totalLessons} lessons`);
+  console.log(`Created 1 admin, 2 teachers, ${students.length} students`);
   console.log(`  Unit 1 (Higher/Lower): ${unit1Lessons.length} lessons`);
   console.log(`  Unit 2 (p, f, Repeated): ${unit2Lessons.length} lessons`);
   console.log(`  Unit 3 (Slur, Octave): ${unit3Lessons.length} lessons`);
