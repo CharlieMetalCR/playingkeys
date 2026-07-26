@@ -15,7 +15,9 @@ export default function ProfileScreen() {
         <Text style={styles.name}>{user?.name ?? 'Usuario'}</Text>
         <Text style={styles.email}>{user?.email ?? ''}</Text>
         <View style={styles.planBadge}>
-          <Text style={styles.planText}>Plan Premium</Text>
+          <Text style={styles.planText}>
+            {user?.role === 'ADMIN' ? t('role.admin') : user?.role === 'TEACHER' ? t('role.teacher') : t('role.student')}
+          </Text>
         </View>
       </View>
 

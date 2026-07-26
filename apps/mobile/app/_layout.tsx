@@ -1,5 +1,5 @@
 import { Tabs, Redirect, Stack } from 'expo-router';
-import { LayoutGrid, Piano, LibraryBig, ChartNoAxesCombined, User } from 'lucide-react-native';
+import { LayoutGrid, Piano, LibraryBig, ChartNoAxesCombined, User, ShieldHalf, Users } from 'lucide-react-native';
 import { I18nProvider, useTranslation } from '../i18n';
 import { AuthProvider, useAuth } from '../hooks/useAuth';
 import { ActivityIndicator, View } from 'react-native';
@@ -29,6 +29,9 @@ function AuthGate() {
 
 function TabNavigator() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
+  const isTeacher = user?.role === 'TEACHER';
 
   return (
     <Tabs
@@ -84,6 +87,22 @@ function TabNavigator() {
         options={{
           title: t('tab.progress'),
           tabBarIcon: ({ color, size }) => <ChartNoAxesCombined size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="admin"
+        options={{
+          title: t('tab.admin'),
+          tabBarIcon: ({ color, size }) => <ShieldHalf size={size} color={color} />,
+          href: isAdmin ? undefined : null,
+        }}
+      />
+      <Tabs.Screen
+        name="teacher"
+        options={{
+          title: t('tab.teacher'),
+          tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
+          href: isTeacher ? undefined : null,
         }}
       />
       <Tabs.Screen
