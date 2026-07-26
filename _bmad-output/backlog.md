@@ -60,15 +60,15 @@
 
 ### Story 3.1: User registration
 **As** a new student, **I want** to create an account with email/password.
-**Status:** Not started. Schema exists (User model). Need auth module.
+**Status:** Done. `POST /auth/register` creates user + role record (Student/Teacher/Admin). Mobile register screen.
 
 ### Story 3.2: Login + JWT
 **As** a user, **I want** to log in and receive a JWT token.
-**Status:** Not started. Need AuthModule, login endpoint, JWT strategy.
+**Status:** Done. `POST /auth/login` returns JWT (7d expiry). Mobile login screen with AsyncStorage token persistence.
 
 ### Story 3.3: Role-based routing
 **As** an admin/teacher/student, **I want** to see only my allowed views.
-**Status:** Not started. Need guard + role check.
+**Status:** Partial. JwtAuthGuard + RolesGuard + @Roles() decorator implemented. POST /progress requires auth for students. Full role-based UI routing deferred.
 
 ---
 

@@ -177,6 +177,7 @@ export default function AdminPage() {
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [lessonDetail, setLessonDetail] = useState<Record<string, unknown> | null>(null);
   const [lessonLoading, setLessonLoading] = useState(false);
+  const [adminStudents, setAdminStudents] = useState<AdminStudentRow[]>([]);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const metroTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -351,6 +352,33 @@ export default function AdminPage() {
                   }))
                 : [],
             })),
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/students`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAdminStudents(
+            data.map((s: Record<string, unknown>) => {
+              const user = s.user as Record<string, unknown> | undefined;
+              const name = (user?.name as string) || "Student";
+              const initials = name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
+              const hue = Math.abs(name.charCodeAt(0) * 7 + (name.charCodeAt(1) || 0) * 13) % 360;
+              return {
+                initials,
+                hue,
+                name,
+                course: "—",
+                progress: 0,
+                status: "online" as const,
+                statusLabel: "admin.statusOnline",
+              };
+            }),
           );
         }
       })
@@ -865,7 +893,7 @@ export default function AdminPage() {
                   <tr><th>{t("admin.tableStudent")}</th><th>{t("admin.tableCourse")}</th><th>{t("admin.tableProgress")}</th><th>{t("admin.tableStatus")}</th></tr>
                 </thead>
                 <tbody>
-                  {ADMIN_STUDENTS.map((s, i) => (
+                  {adminStudents.map((s, i) => (
                     <tr key={i}>
                       <td>
                         <div className="table-user">
