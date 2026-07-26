@@ -187,6 +187,7 @@ export default function AdminPage() {
   const [lessonLoading, setLessonLoading] = useState(false);
   const [adminStudents, setAdminStudents] = useState<AdminStudentRow[]>([]);
   const [adminStats, setAdminStats] = useState({ students: 0, lessons: 0 });
+  const [studentSearch, setStudentSearch] = useState("");
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const metroTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -968,14 +969,34 @@ export default function AdminPage() {
             <div className="panel">
               <div className="panel-head">
                 <h3><UserRound /> {t("admin.recentStudents")}</h3>
-                <button className="link-btn">{t("admin.viewAll")}</button>
+                <input
+                  type="text"
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  placeholder={t("search.placeholder")}
+                  style={{
+                    padding: "4px 8px",
+                    fontSize: 12,
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 6,
+                    color: "inherit",
+                    width: 180,
+                  }}
+                />
               </div>
               <table className="data-table">
                 <thead>
                   <tr><th>{t("admin.tableStudent")}</th><th>{t("admin.tableCourse")}</th><th>{t("admin.tableProgress")}</th><th>{t("admin.tableStatus")}</th></tr>
                 </thead>
                 <tbody>
-                  {adminStudents.map((s, i) => (
+                  {adminStudents
+                    .filter((s) => {
+                      if (!studentSearch) return true;
+                      const q = studentSearch.toLowerCase();
+                      return s.name.toLowerCase().includes(q) || s.course.toLowerCase().includes(q);
+                    })
+                    .map((s, i) => (
                     <tr key={i}>
                       <td>
                         <div className="table-user">

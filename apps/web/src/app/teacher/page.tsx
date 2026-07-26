@@ -12,12 +12,14 @@ interface StudentRow {
   name: string;
   email: string;
   phone: string | null;
+  notes: string | null;
   initials: string;
   hue: number;
   completed: number;
   total: number;
   avgScore: number;
   lastActivity: string | null;
+  progress: Array<{ id: string; status: string; score: number | null; lessonId: string; completedAt: string | null }>;
 }
 
 interface TeacherStats {
@@ -38,6 +40,10 @@ export default function TeacherPage() {
   const [stats, setStats] = useState<TeacherStats>({ totalStudents: 0, avgClassProgress: 0, totalCompleted: 0 });
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<StudentRow | null>(null);
+  const [noteText, setNoteText] = useState("");
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [noteSaved, setNoteSaved] = useState(false);
 
   const isTeacher = user?.role === "TEACHER";
 
@@ -65,12 +71,20 @@ export default function TeacherPage() {
               name,
               email: (userObj?.email as string) || "",
               phone: (s.phone as string) || null,
+              notes: (s.notes as string) || null,
               initials,
               hue,
               completed,
               total: progress.length,
               avgScore,
               lastActivity: lastProg,
+              progress: progress.map((p) => ({
+                id: p.id as string,
+                status: p.status as string,
+                score: p.score as number | null,
+                lessonId: p.lessonId as string,
+                completedAt: p.completedAt as string | null,
+              })),
             };
           });
 
@@ -97,6 +111,38 @@ export default function TeacherPage() {
       setLoginError(true);
     } finally {
       setLoggingIn(false);
+    }
+  };
+
+  const handleStudentClick = (student: StudentRow) => {
+    setSelectedStudent(student);
+    setNoteText(student.notes || "");
+    setNoteSaved(false);
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selectedStudent || !token) return;
+    setNoteSaving(true);
+    try {
+      const res = await fetch(`${API_BASE}/teachers/me/students/${selectedStudent.id}/notes`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ notes: noteText }),
+      });
+      if (res.ok) {
+        setStudents((prev) =>
+          prev.map((s) => (s.id === selectedStudent.id ? { ...s, notes: noteText } : s))
+        );
+        setSelectedStudent((prev) => (prev ? { ...prev, notes: noteText } : null));
+        setNoteSaved(true);
+        setTimeout(() => setNoteSaved(false), 2000);
+      }
+    } catch {
+    } finally {
+      setNoteSaving(false);
     }
   };
 
@@ -269,7 +315,15 @@ export default function TeacherPage() {
                           const pct = s.total > 0 ? Math.round((s.completed / s.total) * 100) : 0;
                           const isActive = s.lastActivity && new Date(s.lastActivity).getTime() > Date.now() - 7 * 86400000;
                           return (
-                            <tr key={s.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            <tr
+                              key={s.id}
+                              onClick={() => handleStudentClick(s)}
+                              style={{
+                                borderBottom: "1px solid rgba(255,255,255,0.04)",
+                                cursor: "pointer",
+                                background: selectedStudent?.id === s.id ? "rgba(139,92,246,0.08)" : undefined,
+                              }}
+                            >
                               <td style={tdStyle}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                                   <div className="avatar avatar-sm" style={{ "--h": String(s.hue) } as React.CSSProperties}>
@@ -315,6 +369,110 @@ export default function TeacherPage() {
                   </div>
                 )}
               </section>
+
+              {selectedStudent && (
+                <section style={{ marginTop: 24, padding: 20, background: "rgba(255,255,255,0.03)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div className="avatar avatar-md" style={{ "--h": String(selectedStudent.hue) } as React.CSSProperties}>
+                        {selectedStudent.initials}
+                      </div>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{selectedStudent.name}</h3>
+                        <p style={{ margin: 0, fontSize: 13, opacity: 0.5 }}>{selectedStudent.email}</p>
+                      </div>
+                    </div>
+                    <button
+                      className="icon-btn ghost"
+                      onClick={() => setSelectedStudent(null)}
+                      style={{ opacity: 0.5 }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+                    <div>
+                      <div style={{ fontSize: 12, opacity: 0.5, marginBottom: 4 }}>{t("teacher.tableProgress")}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div className="progress-track" style={{ flex: 1 }}>
+                          <div className="progress-fill" style={{ width: `${selectedStudent.total > 0 ? Math.round((selectedStudent.completed / selectedStudent.total) * 100) : 0}%` }} />
+                        </div>
+                        <span style={{ fontSize: 13 }}>
+                          {selectedStudent.total > 0 ? Math.round((selectedStudent.completed / selectedStudent.total) * 100) : 0}%
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 12, opacity: 0.5, marginBottom: 4 }}>{t("teacher.tableAvgScore")}</div>
+                      <div style={{ fontSize: 14, fontWeight: 500 }}>
+                        {selectedStudent.avgScore > 0 ? t("teacher.avgScore", { score: String(selectedStudent.avgScore) }) : "—"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {selectedStudent.progress.length > 0 && (
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={{ fontSize: 12, opacity: 0.5, marginBottom: 8 }}>{t("teacher.recentProgress")}</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        {selectedStudent.progress.slice(0, 5).map((p) => (
+                          <div key={p.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 10px", background: "rgba(255,255,255,0.03)", borderRadius: 6, fontSize: 13 }}>
+                            <span style={{ opacity: 0.7 }}>Lesson {p.lessonId.slice(0, 8)}...</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              {p.score !== null && <span style={{ opacity: 0.6 }}>{p.score}%</span>}
+                              <span style={{
+                                padding: "1px 6px",
+                                borderRadius: 8,
+                                fontSize: 11,
+                                background: p.status === "COMPLETED" ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.06)",
+                                color: p.status === "COMPLETED" ? "#22c55e" : "rgba(255,255,255,0.4)",
+                              }}>
+                                {p.status}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <div style={{ fontSize: 12, opacity: 0.5, marginBottom: 8 }}>{t("teacher.feedbackTitle")}</div>
+                    <textarea
+                      value={noteText}
+                      onChange={(e) => setNoteText(e.target.value)}
+                      placeholder={t("teacher.feedbackPlaceholder")}
+                      rows={3}
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: 8,
+                        color: "inherit",
+                        fontFamily: "inherit",
+                        fontSize: 14,
+                        resize: "vertical",
+                      }}
+                    />
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8, gap: 8 }}>
+                      {noteSaved && (
+                        <span style={{ fontSize: 13, color: "#22c55e", alignSelf: "center" }}>
+                          {t("teacher.feedbackSaved")}
+                        </span>
+                      )}
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleSaveNotes}
+                        disabled={noteSaving}
+                        style={{ padding: "6px 16px", fontSize: 13 }}
+                      >
+                        {noteSaving ? "..." : t("teacher.feedbackSave")}
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              )}
             </>
           )}
         </main>

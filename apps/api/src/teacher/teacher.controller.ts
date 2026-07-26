@@ -35,6 +35,17 @@ export class TeacherController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('TEACHER')
+  @Patch('me/students/:studentId/notes')
+  updateStudentNotes(
+    @Request() req: { user: { id: string } },
+    @Param('studentId') studentId: string,
+    @Body('notes') notes: string,
+  ) {
+    return this.teacherService.updateStudentNotes(req.user.id, studentId, notes);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateTeacherDto) {

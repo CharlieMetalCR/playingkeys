@@ -154,5 +154,15 @@
   "teacher.overview": "Resumen",
   "teacher.totalStudents": "Total estudiantes",
   "teacher.avgClassProgress": "Progreso promedio",
-  "teacher.totalCompleted": "Lecciones completadas"
+  "teacher.totalCompleted": "Lecciones completadas",
+  "teacher.feedbackTitle": "Notas del Estudiante",
+  "teacher.feedbackPlaceholder": "Agrega notas sobre el progreso del estudiante...",
+  "teacher.feedbackSave": "Guardar Notas",
+  "teacher.feedbackSaved": "Guardado",
+  "teacher.viewDetails": "Ver Detalles",
+  "teacher.studentDetail": "Detalles del Estudiante",
+  "teacher.recentProgress": "Progreso Reciente",
+  "teacher.noProgress": "Sin progreso registrado",
+  "teacher.score": "Puntuación: {{score}}%",
+  "teacher.completedOn": "Completado {{date}}"
 }
