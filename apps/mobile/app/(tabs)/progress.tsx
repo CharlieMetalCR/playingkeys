@@ -1,6 +1,10 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Award, Target, Flame, Star } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { Award, Target, Flame, Star, AlertCircle, RefreshCw } from 'lucide-react-native';
 import { useTranslation } from '../../i18n';
+import { fetchStudentProgress, ApiProgress } from '../../lib/api';
+
+const DEMO_STUDENT_ID = '66397b72-6376-438c-8abd-08013af8d29b';
 
 const WEEKS = [
   { label: 'S1', values: [3, 5, 2, 6, 4, 1, 5] },
@@ -12,8 +16,6 @@ const WEEKS = [
   { label: 'S7', values: [4, 6, 3, 7, 5, 2, 6] },
 ];
 
-const HEAT_DATA = Array.from({ length: 84 }, () => Math.floor(Math.random() * 5));
-
 function heatColor(level: number) {
   switch (level) {
     case 0: return '#111827';
@@ -24,10 +26,103 @@ function heatColor(level: number) {
   }
 }
 
-const barMax = Math.max(...WEEKS.flatMap((w) => w.values));
+function computeStats(progress: ApiProgress[]) {
+  const completed = progress.filter((p) => p.status === 'COMPLETED');
+  const scores = completed.filter((p) => p.score != null).map((p) => p.score!);
+  const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+
+  const completedDates = completed
+    .filter((p) => p.completedAt)
+    .map((p) => new Date(p.completedAt!).toDateString())
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+  let streak = 0;
+  if (completedDates.length > 0) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let checkDate = new Date(today);
+    for (const dateStr of completedDates) {
+      const d = new Date(dateStr);
+      d.setHours(0, 0, 0, 0);
+      if (d.getTime() === checkDate.getTime()) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else if (d.getTime() < checkDate.getTime()) {
+        break;
+      }
+    }
+  }
+
+  return { completedCount: completed.length, avgScore, streak };
+}
+
+function computeHeatData(progress: ApiProgress[]): number[] {
+  const dayMap = new Map<string, number>();
+  for (const p of progress) {
+    if (p.completedAt) {
+      const key = new Date(p.completedAt).toDateString();
+      dayMap.set(key, (dayMap.get(key) ?? 0) + 1);
+    }
+  }
+  const result: number[] = [];
+  const today = new Date();
+  for (let i = 83; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const count = dayMap.get(d.toDateString()) ?? 0;
+    result.push(Math.min(count, 4));
+  }
+  return result;
+}
 
 export default function ProgressScreen() {
   const { t } = useTranslation();
+  const [progress, setProgress] = useState<ApiProgress[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchStudentProgress(DEMO_STUDENT_ID);
+      setProgress(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load progress');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#7C3AED" />
+        <Text style={styles.loadingText}>{t('courses.loading')}</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <AlertCircle size={40} color="#EF4444" />
+        <Text style={styles.errorText}>{error}</Text>
+        <View style={styles.retryBtn}>
+          <RefreshCw size={16} color="#fff" />
+          <Text style={styles.retryText} onPress={load}>{t('courses.retry')}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  const stats = computeStats(progress);
+  const heatData = computeHeatData(progress);
+  const barMax = Math.max(...WEEKS.flatMap((w) => w.values), 1);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.section}>
@@ -47,16 +142,16 @@ export default function ProgressScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('progress.historyTitle')}</Text>
         <View style={styles.heatmap}>
-          {HEAT_DATA.map((level, i) => (
+          {heatData.map((level, i) => (
             <View key={i} style={[styles.heatCell, { backgroundColor: heatColor(level) }]} />
           ))}
         </View>
         <View style={styles.legendRow}>
-          <Text style={styles.legendLabel}>Menos</Text>
+          <Text style={styles.legendLabel}>{t('progress.less')}</Text>
           {[0, 1, 2, 3, 4].map((l) => (
             <View key={l} style={[styles.legendSwatch, { backgroundColor: heatColor(l) }]} />
           ))}
-          <Text style={styles.legendLabel}>Más</Text>
+          <Text style={styles.legendLabel}>{t('progress.more')}</Text>
         </View>
       </View>
 
@@ -65,29 +160,29 @@ export default function ProgressScreen() {
           <View style={[styles.statIcon, { backgroundColor: 'rgba(124,58,237,.16)' }]}>
             <Award size={18} color="#C4B5FD" />
           </View>
-          <Text style={styles.statValue}>5</Text>
+          <Text style={styles.statValue}>{stats.completedCount}</Text>
           <Text style={styles.statLabel}>{t('progress.completed')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(56,189,248,.14)' }]}>
             <Target size={18} color="#38BDF8" />
           </View>
-          <Text style={styles.statValue}>87%</Text>
+          <Text style={styles.statValue}>{stats.avgScore}%</Text>
           <Text style={styles.statLabel}>{t('progress.avgScore')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(245,158,11,.16)' }]}>
             <Flame size={18} color="#FBBF24" />
           </View>
-          <Text style={styles.statValue}>14</Text>
+          <Text style={styles.statValue}>{stats.streak}</Text>
           <Text style={styles.statLabel}>{t('progress.streak')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(34,197,94,.14)' }]}>
             <Star size={18} color="#22C55E" />
           </View>
-          <Text style={styles.statValue}>4.5</Text>
-          <Text style={styles.statLabel}>Evaluación profesor</Text>
+          <Text style={styles.statValue}>{progress.length}</Text>
+          <Text style={styles.statLabel}>{t('progress.totalTracked')}</Text>
         </View>
       </View>
     </ScrollView>
@@ -97,6 +192,14 @@ export default function ProgressScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0B0F17' },
   content: { padding: 16, paddingBottom: 40 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0B0F17', padding: 32 },
+  loadingText: { marginTop: 12, fontSize: 14, color: '#9CA3AF' },
+  errorText: { marginTop: 12, fontSize: 16, color: '#EF4444', textAlign: 'center' },
+  retryBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    marginTop: 16, backgroundColor: '#7C3AED', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12,
+  },
+  retryText: { color: '#fff', fontWeight: '600' },
 
   section: {
     backgroundColor: '#1A2233', borderWidth: 1, borderColor: '#273244',
