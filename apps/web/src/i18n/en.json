@@ -118,5 +118,13 @@
   "admin.module5": "Module 5 · Basic improvisation",
   "admin.module5Sub": "Under editorial review",
   "admin.courseJazz": "Course · Jazz piano for beginners",
-  "admin.courseJazzSub": "Draft — 3 lessons"
+  "admin.courseJazzSub": "Draft — 3 lessons",
+
+  "lesson.instructions": "Instructions",
+  "lesson.keySignature": "Key signature",
+  "lesson.fingering": "Fingering",
+  "lesson.dynamics": "Dynamics",
+  "lesson.back": "Back",
+  "lesson.loading": "Loading lesson...",
+  "lesson.notFound": "Lesson not found"
 }

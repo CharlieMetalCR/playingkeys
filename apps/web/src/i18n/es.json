@@ -118,5 +118,13 @@
   "admin.module5": "Módulo 5 · Improvisación básica",
   "admin.module5Sub": "En revisión editorial",
   "admin.courseJazz": "Curso · Piano jazz para principiantes",
-  "admin.courseJazzSub": "Borrador — 3 lecciones"
+  "admin.courseJazzSub": "Borrador — 3 lecciones",
+
+  "lesson.instructions": "Instrucciones",
+  "lesson.keySignature": "Armadura",
+  "lesson.fingering": "Digitación",
+  "lesson.dynamics": "Dinámica",
+  "lesson.back": "Volver",
+  "lesson.loading": "Cargando lección...",
+  "lesson.notFound": "Lección no encontrada"
 }

@@ -55,6 +55,7 @@ import {
   PencilLine,
   Layers,
   MoonStar,
+  BookOpen,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -171,6 +172,11 @@ export default function AdminPage() {
   const [waveHeights, setWaveHeights] = useState<number[]>([]);
   const [heatmapCells, setHeatmapCells] = useState<number[]>([]);
   const [courses, setCourses] = useState<CourseDef[]>(STATIC_COURSES);
+  const [courseUnits, setCourseUnits] = useState<Array<{ id: string; title: string; description: string | null; lessons: Array<{ id: string; title: string; number: number }> }>>([]);
+  const [expandedUnitId, setExpandedUnitId] = useState<string | null>(null);
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [lessonDetail, setLessonDetail] = useState<Record<string, unknown> | null>(null);
+  const [lessonLoading, setLessonLoading] = useState(false);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const metroTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -249,6 +255,19 @@ export default function AdminPage() {
   const setView = useCallback((id: ViewId) => {
     setViewState(id);
     setSidebarOpen(false);
+    setSelectedLessonId(null);
+    setLessonDetail(null);
+  }, []);
+
+  const handleLessonClick = useCallback((lessonId: string) => {
+    setSelectedLessonId(lessonId);
+    setLessonLoading(true);
+    setLessonDetail(null);
+    fetch(`${API_BASE}/lessons/${lessonId}`)
+      .then((r) => r.json())
+      .then((data) => { setLessonDetail(data as Record<string, unknown>); })
+      .catch(() => {})
+      .finally(() => { setLessonLoading(false); });
   }, []);
 
   const toggleRole = useCallback(() => {
@@ -317,6 +336,20 @@ export default function AdminPage() {
               locked: false,
               coverClass: cvClasses[i % cvClasses.length],
               icon: icons[i % icons.length],
+            })),
+          );
+          setCourseUnits(
+            data.map((u: Record<string, unknown>) => ({
+              id: u.id as string,
+              title: (u.title as string) || "Unidad",
+              description: (u.description as string) || null,
+              lessons: Array.isArray(u.lessons)
+                ? (u.lessons as Array<Record<string, unknown>>).map((l) => ({
+                    id: l.id as string,
+                    title: (l.title as string) || "Lección",
+                    number: (l.number as number) || 0,
+                  }))
+                : [],
             })),
           );
         }
@@ -636,32 +669,103 @@ export default function AdminPage() {
 
         {/* COURSES */}
         <main className={`view ${view === "courses" ? "is-active" : ""}`}>
-          <section className="course-grid">
-            {courses.map((c, i) => {
-              const IconComp = c.icon;
-              return (
-                <article key={i} className="course-card">
-                  <div className={`course-cover ${c.coverClass}`}>
-                    <IconComp />
-                    <span className="course-level">{t(c.level)}</span>
-                    {c.locked && <span className="course-lock"><Lock /></span>}
-                  </div>
-                  <div className="course-body">
-                    <span className="course-title">{c.title}</span>
-                    <p className="course-desc">{c.desc}</p>
-                    <div className="course-progress-row">
-                      <div className="progress-track"><div className="progress-fill" style={{ width: `${c.progress}%` }}></div></div>
-                      <span>{c.progress}%</span>
+          {selectedLessonId ? (
+            <section className="panel" style={{ maxWidth: 720 }}>
+              <div className="panel-head">
+                <h3><BookOpen /> {t("lesson.instructions")}</h3>
+                <button className="link-btn" onClick={() => { setSelectedLessonId(null); setLessonDetail(null); }}>
+                  ← {t("lesson.back")}
+                </button>
+              </div>
+              {lessonLoading ? (
+                <p style={{ color: "#9CA3AF", padding: 16 }}>{t("lesson.loading")}</p>
+              ) : lessonDetail ? (
+                <div style={{ padding: 16 }}>
+                  <h2 style={{ color: "#F9FAFB", fontSize: 22, fontWeight: 700, marginBottom: 8 }}>
+                    {(lessonDetail.title as string) || ""}
+                  </h2>
+                  {lessonDetail.content != null && typeof lessonDetail.content === "object" && (
+                    <>
+                      {((lessonDetail.content as Record<string, unknown>).instructions as string) && (
+                        <p style={{ color: "#D1D5DB", lineHeight: 1.7, marginTop: 12 }}>
+                          {((lessonDetail.content as Record<string, unknown>).instructions as string)}
+                        </p>
+                      )}
+                      {((lessonDetail.content as Record<string, unknown>).keySignature as string) && (
+                        <div style={{ marginTop: 16 }}>
+                          <span style={{ color: "#9CA3AF", fontWeight: 600, fontSize: 12, textTransform: "uppercase" as const }}>{t("lesson.keySignature")}: </span>
+                          <span style={{ color: "#C4B5FD", fontWeight: 600 }}>{((lessonDetail.content as Record<string, unknown>).keySignature as string)}</span>
+                        </div>
+                      )}
+                      {((lessonDetail.content as Record<string, unknown>).fingering as string) && (
+                        <div style={{ marginTop: 8 }}>
+                          <span style={{ color: "#9CA3AF", fontWeight: 600, fontSize: 12, textTransform: "uppercase" as const }}>{t("lesson.fingering")}: </span>
+                          <span style={{ color: "#C4B5FD", fontWeight: 600 }}>{((lessonDetail.content as Record<string, unknown>).fingering as string)}</span>
+                        </div>
+                      )}
+                      {((lessonDetail.content as Record<string, unknown>).dynamics as string) && (
+                        <div style={{ marginTop: 8 }}>
+                          <span style={{ color: "#9CA3AF", fontWeight: 600, fontSize: 12, textTransform: "uppercase" as const }}>{t("lesson.dynamics")}: </span>
+                          <span style={{ color: "#C4B5FD", fontWeight: 600 }}>{((lessonDetail.content as Record<string, unknown>).dynamics as string)}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ) : (
+                <p style={{ color: "#6B7686", padding: 16 }}>{t("lesson.notFound")}</p>
+              )}
+            </section>
+          ) : (
+            <section className="course-grid">
+              {courses.map((c, i) => {
+                const IconComp = c.icon;
+                const unit = courseUnits[i];
+                const isExpanded = expandedUnitId === unit?.id;
+                return (
+                  <article key={i} className="course-card">
+                    <div className={`course-cover ${c.coverClass}`}>
+                      <IconComp />
+                      <span className="course-level">{t(c.level)}</span>
+                      {c.locked && <span className="course-lock"><Lock /></span>}
                     </div>
-                    <button className={`btn ${c.locked ? "btn-ghost" : "btn-primary"}`} disabled={c.locked} style={c.locked ? { opacity: 0.55, cursor: "not-allowed" } : undefined}>
-                      {c.locked ? <Lock /> : c.progress > 0 ? <Play /> : <Sparkles />}
-                      {c.locked ? t("courses.locked") : c.progress > 0 ? t("courses.continue") : t("courses.start")}
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
+                    <div className="course-body">
+                      <span className="course-title">{c.title}</span>
+                      <p className="course-desc">{c.desc}</p>
+                      <div className="course-progress-row">
+                        <div className="progress-track"><div className="progress-fill" style={{ width: `${c.progress}%` }}></div></div>
+                        <span>{c.progress}%</span>
+                      </div>
+                      <button
+                        className={`btn ${c.locked ? "btn-ghost" : "btn-primary"}`}
+                        disabled={c.locked}
+                        style={c.locked ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
+                        onClick={() => unit && setExpandedUnitId(isExpanded ? null : unit.id)}
+                      >
+                        {c.locked ? <Lock /> : c.progress > 0 ? <Play /> : <Sparkles />}
+                        {c.locked ? t("courses.locked") : c.progress > 0 ? t("courses.continue") : t("courses.start")}
+                      </button>
+                    </div>
+                    {isExpanded && unit && unit.lessons.length > 0 && (
+                      <div style={{ borderTop: "1px solid #273244", padding: 12 }}>
+                        {unit.lessons.map((l) => (
+                          <button
+                            key={l.id}
+                            className="nav-item"
+                            style={{ width: "100%", textAlign: "left", justifyContent: "flex-start", gap: 10, padding: "8px 12px", borderRadius: 8, marginBottom: 4, cursor: "pointer" }}
+                            onClick={() => handleLessonClick(l.id)}
+                          >
+                            <span style={{ color: "#C4B5FD", fontWeight: 700, fontSize: 12, minWidth: 24 }}>{l.number}</span>
+                            <span>{l.title}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </section>
+          )}
         </main>
 
         {/* PROGRESS */}
