@@ -1,13 +1,18 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { ProgressService } from './progress.service';
 import { CreateProgressDto } from './dto/create-progress.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('progress')
 export class ProgressController {
   constructor(private readonly progressService: ProgressService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createProgressDto: CreateProgressDto) {
+  create(@Body() createProgressDto: CreateProgressDto, @Request() req: { user: { id: string; role: string } }) {
+    if (req.user.role === 'STUDENT') {
+      createProgressDto.studentId = req.user.id;
+    }
     return this.progressService.create(createProgressDto);
   }
 

@@ -24,11 +24,15 @@
 
 ### Story 1.6: Metronome
 **As** a student, **I want** a tempo control and metronome during practice.
-**Status:** Done (web). Mobile has UI but no actual metronome audio yet.
+**Status:** Done. Web Audio (web), expo-av WAV generation (native).
 
 ### Story 1.7: Course cards from API
 **As** a student, **I want** to see all available courses/units as cards.
 **Status:** Done. Web fetches from API, mobile fetches from API.
+
+### Story 1.8: Internationalization (i18n)
+**As** a user, **I want** the app in Spanish or English.
+**Status:** Done. Full i18n system for mobile and web with es/en translations. Language toggle on profile and web topbar.
 
 ---
 
@@ -36,19 +40,19 @@
 
 ### Story 2.1: Lesson detail with content from API
 **As** a student, **I want** to open a lesson and see its instructions, notation info, and fingering.
-**Status:** Partial. Mobile fetches from API. Web needs lesson detail view.
+**Status:** Done. Mobile fetches from API with mark-complete. Web shows expandable lessons + detail view.
 
 ### Story 2.2: Mark lesson complete (progress tracking)
 **As** a student, **I want** to mark a lesson as complete and see my progress update.
-**Status:** Partial. Button exists but doesn't persist to DB. Need `POST /api/progress` endpoint.
+**Status:** Done. `POST /api/progress` endpoint with upsert. Mobile lesson detail has mark-complete button.
 
 ### Story 2.3: Progress dashboard
 **As** a student, **I want** to see my practice stats (minutes, streak, accuracy).
-**Status:** UI exists (bar chart, heatmap, stat cards). All dummy data. Need real tracking.
+**Status:** Done (mobile). Fetches real data from API. Computes completed, avg score, streak, heatmap from real records.
 
 ### Story 2.4: Mobile metronome audio
 **As** a student, **I want** the metronome to actually tick on mobile.
-**Status:** Not started. Need expo-av tick sound.
+**Status:** Done. `useMetronome` hook with Web Audio (web) + expo-av WAV generation (native).
 
 ---
 

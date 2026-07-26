@@ -86,5 +86,15 @@
   "profile.support": "SUPPORT",
   "profile.help": "Help",
   "profile.privacy": "Privacy",
-  "profile.premiumPlan": "Premium Plan"
+  "profile.premiumPlan": "Premium Plan",
+  "auth.loginSubtitle": "Sign in to continue",
+  "auth.registerTitle": "Create account",
+  "auth.registerSubtitle": "Start playing today",
+  "auth.email": "Email",
+  "auth.password": "Password",
+  "auth.name": "Name",
+  "auth.login": "Sign in",
+  "auth.register": "Create account",
+  "auth.noAccount": "Don't have an account? Sign up",
+  "auth.hasAccount": "Already have an account? Sign in"
 }

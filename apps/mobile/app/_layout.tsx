@@ -1,6 +1,31 @@
-import { Tabs } from 'expo-router';
+import { Tabs, Redirect, Stack } from 'expo-router';
 import { LayoutGrid, Piano, LibraryBig, ChartNoAxesCombined, User } from 'lucide-react-native';
 import { I18nProvider, useTranslation } from '../i18n';
+import { AuthProvider, useAuth } from '../hooks/useAuth';
+import { ActivityIndicator, View } from 'react-native';
+
+function AuthGate() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0B0F17' }}>
+        <ActivityIndicator size="large" color="#7C3AED" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="login" />
+        <Stack.Screen name="register" />
+      </Stack>
+    );
+  }
+
+  return <TabNavigator />;
+}
 
 function TabNavigator() {
   const { t } = useTranslation();
@@ -75,7 +100,9 @@ function TabNavigator() {
 export default function TabLayout() {
   return (
     <I18nProvider>
-      <TabNavigator />
+      <AuthProvider>
+        <AuthGate />
+      </AuthProvider>
     </I18nProvider>
   );
 }

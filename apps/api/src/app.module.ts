@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { LessonModule } from './lesson/lesson.module';
 import { UnitModule } from './unit/unit.module';
 import { ProgressModule } from './progress/progress.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ProgressModule } from './progress/progress.module';
       isGlobal: true,
     }),
     PrismaModule,
+    AuthModule,
     LessonModule,
     UnitModule,
     ProgressModule,

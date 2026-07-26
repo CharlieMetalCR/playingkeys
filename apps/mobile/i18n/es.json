@@ -86,5 +86,15 @@
   "profile.support": "SOPORTE",
   "profile.help": "Ayuda",
   "profile.privacy": "Privacidad",
-  "profile.premiumPlan": "Plan Premium"
+  "profile.premiumPlan": "Plan Premium",
+  "auth.loginSubtitle": "Inicia sesión para continuar",
+  "auth.registerTitle": "Crear cuenta",
+  "auth.registerSubtitle": "Empieza a tocar hoy",
+  "auth.email": "Correo electrónico",
+  "auth.password": "Contraseña",
+  "auth.name": "Nombre",
+  "auth.login": "Iniciar sesión",
+  "auth.register": "Crear cuenta",
+  "auth.noAccount": "¿No tienes cuenta? Regístrate",
+  "auth.hasAccount": "¿Ya tienes cuenta? Inicia sesión"
 }

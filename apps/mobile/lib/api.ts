@@ -6,6 +6,47 @@ const API_URL = Platform.select({
   default: 'http://localhost:3001/api',
 });
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: AuthUser;
+}
+
+export async function authLogin(email: string, password: string): Promise<AuthResponse> {
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) throw new Error(`Login failed: ${res.status}`);
+  return res.json();
+}
+
+export async function authRegister(email: string, name: string, password: string): Promise<AuthResponse> {
+  const res = await fetch(`${API_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, name, password }),
+  });
+  if (!res.ok) throw new Error(`Register failed: ${res.status}`);
+  return res.json();
+}
+
+export async function authProfile(token: string): Promise<AuthUser> {
+  const res = await fetch(`${API_URL}/auth/profile`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Profile fetch failed: ${res.status}`);
+  const data = await res.json();
+  return { id: data.id, email: data.email, name: data.name, role: data.role };
+}
+
 export interface ApiUnit {
   id: string;
   number: number;
@@ -72,10 +113,12 @@ export async function createProgress(data: {
   lessonId: string;
   status?: string;
   score?: number;
-}): Promise<ApiProgress> {
+}, token?: string): Promise<ApiProgress> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetch(`${API_URL}/progress`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);

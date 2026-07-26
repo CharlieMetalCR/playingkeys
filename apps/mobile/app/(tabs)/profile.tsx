@@ -1,17 +1,19 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { User, Settings, CreditCard, LogOut, ChevronRight, Bell, HelpCircle, Shield } from 'lucide-react-native';
 import { useTranslation } from '../../i18n';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function ProfileScreen() {
   const { t, locale, setLocale } = useTranslation();
+  const { user, logout } = useAuth();
   return (
     <ScrollView style={styles.container}>
       <View style={styles.avatarSection}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>C</Text>
+          <Text style={styles.avatarText}>{user?.name?.charAt(0) ?? 'U'}</Text>
         </View>
-        <Text style={styles.name}>Carlos</Text>
-        <Text style={styles.email}>carlos@playingkeys.com</Text>
+        <Text style={styles.name}>{user?.name ?? 'Usuario'}</Text>
+        <Text style={styles.email}>{user?.email ?? ''}</Text>
         <View style={styles.planBadge}>
           <Text style={styles.planText}>Plan Premium</Text>
         </View>
@@ -78,7 +80,7 @@ export default function ProfileScreen() {
         </Pressable>
       </View>
 
-      <Pressable style={styles.signOutBtn}>
+      <Pressable style={styles.signOutBtn} onPress={logout}>
         <LogOut size={18} color="#EF4444" />
         <Text style={styles.signOutText}>{t('profile.logout')}</Text>
       </Pressable>
