@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Play, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react-native';
+import { ArrowLeft, Play, CheckCircle, AlertCircle, RefreshCw, Mic, Square, RotateCcw } from 'lucide-react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { fetchLesson, createProgress, ApiLesson } from '../../lib/api';
 import { useTranslation } from '../../i18n';
+import { useRecorder, formatDuration } from '../../hooks/useRecorder';
 
 const DEMO_STUDENT_ID = '66397b72-6376-438c-8abd-08013af8d29b';
 
@@ -31,6 +32,7 @@ export default function LessonDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+  const recorder = useRecorder();
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -156,6 +158,52 @@ export default function LessonDetailScreen() {
         </View>
       </View>
 
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('record.title')}</Text>
+        {recorder.state === 'error' ? (
+          <Text style={styles.recordError}>{t('record.webNotSupported')}</Text>
+        ) : (
+          <View style={styles.recordBox}>
+            <Text style={styles.recordTimer}>
+              {recorder.state === 'recording'
+                ? t('record.recording')
+                : recorder.duration > 0
+                  ? t('record.duration', { time: formatDuration(recorder.duration) })
+                  : t('record.start')}
+            </Text>
+            {recorder.state === 'recording' && (
+              <View style={styles.recordPulse} />
+            )}
+            <View style={styles.recordActions}>
+              {recorder.state === 'idle' && (
+                <Pressable style={styles.recordBtn} onPress={recorder.toggleRecording}>
+                  <Mic size={20} color="#fff" />
+                  <Text style={styles.recordBtnText}>{t('record.start')}</Text>
+                </Pressable>
+              )}
+              {recorder.state === 'recording' && (
+                <Pressable style={[styles.recordBtn, { backgroundColor: '#EF4444' }]} onPress={recorder.toggleRecording}>
+                  <Square size={18} color="#fff" />
+                  <Text style={styles.recordBtnText}>{t('record.stop')}</Text>
+                </Pressable>
+              )}
+              {(recorder.state === 'recorded' || recorder.state === 'playing') && (
+                <View style={styles.recordPlayback}>
+                  <Pressable style={[styles.recordBtn, { backgroundColor: '#22C55E' }]} onPress={recorder.play}>
+                    <Play size={18} color="#fff" />
+                    <Text style={styles.recordBtnText}>{t('record.play')}</Text>
+                  </Pressable>
+                  <Pressable style={[styles.recordBtn, { backgroundColor: '#273244' }]} onPress={recorder.reset}>
+                    <RotateCcw size={18} color="#C4B5FD" />
+                    <Text style={[styles.recordBtnText, { color: '#C4B5FD' }]}>{t('record.retake')}</Text>
+                  </Pressable>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+      </View>
+
       <Pressable
         style={[styles.completeBtn, completed && styles.completeBtnDone]}
         onPress={handleComplete}
@@ -231,4 +279,22 @@ const styles = StyleSheet.create({
   },
   completeBtnDone: { backgroundColor: '#22C55E' },
   completeText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+
+  recordBox: {
+    backgroundColor: '#111827', borderWidth: 1, borderColor: '#273244',
+    borderRadius: 16, padding: 20, alignItems: 'center',
+  },
+  recordTimer: { fontSize: 14, color: '#9CA3AF', marginBottom: 12 },
+  recordPulse: {
+    width: 12, height: 12, borderRadius: 6, backgroundColor: '#EF4444',
+    marginBottom: 12, opacity: 1,
+  },
+  recordActions: { flexDirection: 'row', gap: 10 },
+  recordBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#7C3AED', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10,
+  },
+  recordBtnText: { fontSize: 14, fontWeight: '600', color: '#fff' },
+  recordPlayback: { flexDirection: 'row', gap: 10 },
+  recordError: { fontSize: 14, color: '#6B7686', textAlign: 'center', padding: 20 },
 });
