@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Play, CheckCircle, AlertCircle, RefreshCw, Mic, Square, RotateCcw } from 'lucide-react-native';
+import { ArrowLeft, Play, CheckCircle, AlertCircle, RefreshCw, Mic, Square, RotateCcw, AudioWaveform } from 'lucide-react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { fetchLesson, createProgress, ApiLesson } from '../../lib/api';
 import { useTranslation } from '../../i18n';
 import { useRecorder, formatDuration } from '../../hooks/useRecorder';
+import { findClosestTarget } from '../../lib/pitchDetect';
 
 const DEMO_STUDENT_ID = '66397b72-6376-438c-8abd-08013af8d29b';
 
@@ -174,6 +175,28 @@ export default function LessonDetailScreen() {
             {recorder.state === 'recording' && (
               <View style={styles.recordPulse} />
             )}
+            {recorder.state === 'analyzing' && (
+              <ActivityIndicator size="small" color="#C4B5FD" style={{ marginBottom: 12 }} />
+            )}
+            {recorder.pitch && recorder.state === 'result' && (
+              <View style={styles.pitchResult}>
+                <Text style={styles.pitchNote}>{recorder.pitch.note}{recorder.pitch.octave}</Text>
+                <Text style={styles.pitchFreq}>{recorder.pitch.frequency} Hz</Text>
+                {(() => {
+                  const target = lesson.content.fingering
+                    ? NOTES_FULL.find((n) => n.note.startsWith(lesson.content.fingering?.charAt(0) ?? 'C'))
+                    : NOTES_FULL[0];
+                  if (!target) return null;
+                  const match = findClosestTarget(recorder.pitch!, [{ note: target.note, freq: target.freq }]);
+                  if (!match) return null;
+                  return (
+                    <Text style={[styles.pitchVerdict, { color: match.exact ? '#22C55E' : '#FBBF24' }]}>
+                      {match.exact ? '✓ ' : '~ '}{match.target.note} {Math.round(match.distance)}Hz off
+                    </Text>
+                  );
+                })()}
+              </View>
+            )}
             <View style={styles.recordActions}>
               {recorder.state === 'idle' && (
                 <Pressable style={styles.recordBtn} onPress={recorder.toggleRecording}>
@@ -188,6 +211,22 @@ export default function LessonDetailScreen() {
                 </Pressable>
               )}
               {(recorder.state === 'recorded' || recorder.state === 'playing') && (
+                <View style={styles.recordPlayback}>
+                  <Pressable style={[styles.recordBtn, { backgroundColor: '#22C55E' }]} onPress={recorder.play}>
+                    <Play size={18} color="#fff" />
+                    <Text style={styles.recordBtnText}>{t('record.play')}</Text>
+                  </Pressable>
+                  <Pressable style={[styles.recordBtn, { backgroundColor: '#7C3AED' }]} onPress={recorder.analyze}>
+                    <AudioWaveform size={18} color="#fff" />
+                    <Text style={styles.recordBtnText}>{t('record.analyze')}</Text>
+                  </Pressable>
+                  <Pressable style={[styles.recordBtn, { backgroundColor: '#273244' }]} onPress={recorder.reset}>
+                    <RotateCcw size={18} color="#C4B5FD" />
+                    <Text style={[styles.recordBtnText, { color: '#C4B5FD' }]}>{t('record.retake')}</Text>
+                  </Pressable>
+                </View>
+              )}
+              {recorder.state === 'result' && (
                 <View style={styles.recordPlayback}>
                   <Pressable style={[styles.recordBtn, { backgroundColor: '#22C55E' }]} onPress={recorder.play}>
                     <Play size={18} color="#fff" />
@@ -297,4 +336,9 @@ const styles = StyleSheet.create({
   recordBtnText: { fontSize: 14, fontWeight: '600', color: '#fff' },
   recordPlayback: { flexDirection: 'row', gap: 10 },
   recordError: { fontSize: 14, color: '#6B7686', textAlign: 'center', padding: 20 },
+
+  pitchResult: { alignItems: 'center', marginBottom: 12, padding: 12, backgroundColor: 'rgba(124,58,237,.08)', borderRadius: 12 },
+  pitchNote: { fontSize: 32, fontWeight: '800', color: '#C4B5FD' },
+  pitchFreq: { fontSize: 13, color: '#6B7686', marginTop: 2 },
+  pitchVerdict: { fontSize: 14, fontWeight: '600', marginTop: 8 },
 });

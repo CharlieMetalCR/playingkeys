@@ -92,6 +92,7 @@
   "record.duration": "Duration: {{time}}",
   "record.webNotSupported": "Recording not available on web",
   "record.permissionDenied": "Microphone permission required",
+  "record.analyze": "Analyze Pitch",
   "practice.title": "Practice",
   "practice.lessonName": "Lesson 3 · Major Chords",
   "practice.monitor": "Practice Monitor",

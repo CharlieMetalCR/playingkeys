@@ -1,14 +1,17 @@
 import { useState, useRef, useCallback } from 'react';
 import { Platform } from 'react-native';
 import { Audio } from 'expo-av';
+import { detectPitchFromUri, PitchResult } from '../lib/pitchDetect';
 
-type RecorderState = 'idle' | 'recording' | 'recorded' | 'playing' | 'error';
+type RecorderState = 'idle' | 'recording' | 'recorded' | 'analyzing' | 'result' | 'playing' | 'error';
 
 export function useRecorder() {
   const [state, setState] = useState<RecorderState>('idle');
   const [duration, setDuration] = useState(0);
+  const [pitch, setPitch] = useState<PitchResult | null>(null);
   const recordingRef = useRef<InstanceType<typeof Audio.Recording> | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
+  const uriRef = useRef<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopTimer = useCallback(() => {
@@ -38,6 +41,7 @@ export function useRecorder() {
       );
       recordingRef.current = recording;
       setDuration(0);
+      setPitch(null);
       setState('recording');
       timerRef.current = setInterval(() => setDuration((d) => d + 1), 1000);
     } catch {
@@ -55,6 +59,7 @@ export function useRecorder() {
       const uri = rec.getURI();
       recordingRef.current = null;
       if (uri) {
+        uriRef.current = uri;
         const { sound } = await Audio.Sound.createAsync({ uri });
         soundRef.current = sound;
         setState('recorded');
@@ -66,6 +71,15 @@ export function useRecorder() {
     }
   }, [stopTimer]);
 
+  const analyze = useCallback(async () => {
+    const uri = uriRef.current;
+    if (!uri) return;
+    setState('analyzing');
+    const result = await detectPitchFromUri(uri);
+    setPitch(result);
+    setState('result');
+  }, []);
+
   const play = useCallback(async () => {
     const sound = soundRef.current;
     if (!sound) return;
@@ -75,13 +89,13 @@ export function useRecorder() {
       await sound.playAsync();
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded && status.didJustFinish) {
-          setState('recorded');
+          setState(pitch ? 'result' : 'recorded');
         }
       });
     } catch {
-      setState('recorded');
+      setState(pitch ? 'result' : 'recorded');
     }
-  }, []);
+  }, [pitch]);
 
   const reset = useCallback(() => {
     stopTimer();
@@ -89,7 +103,9 @@ export function useRecorder() {
     soundRef.current = null;
     recordingRef.current?.stopAndUnloadAsync().catch(() => {});
     recordingRef.current = null;
+    uriRef.current = null;
     setDuration(0);
+    setPitch(null);
     setState('idle');
   }, [stopTimer]);
 
@@ -101,7 +117,7 @@ export function useRecorder() {
     }
   }, [state, startRecording, stopRecording]);
 
-  return { state, duration, toggleRecording, play, reset };
+  return { state, duration, pitch, toggleRecording, analyze, play, reset };
 }
 
 function formatDuration(seconds: number): string {

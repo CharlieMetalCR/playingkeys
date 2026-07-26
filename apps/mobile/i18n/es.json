@@ -92,6 +92,7 @@
   "record.duration": "Duración: {{time}}",
   "record.webNotSupported": "Grabación no disponible en web",
   "record.permissionDenied": "Se requiere permiso de micrófono",
+  "record.analyze": "Analizar Tono",
   "practice.title": "Práctica",
   "practice.lessonName": "Lección 3 · Acordes mayores",
   "practice.monitor": "Monitor de práctica",
