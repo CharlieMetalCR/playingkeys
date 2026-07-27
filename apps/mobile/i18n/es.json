@@ -109,6 +109,8 @@
   "profile.help": "Ayuda",
   "profile.privacy": "Privacidad",
   "profile.premiumPlan": "Plan Premium",
+  "profile.on": "Activo",
+  "profile.off": "Inactivo",
   "auth.loginSubtitle": "Inicia sesión para continuar",
   "auth.registerTitle": "Crear cuenta",
   "auth.registerSubtitle": "Empieza a tocar hoy",

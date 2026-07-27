@@ -109,6 +109,8 @@
   "profile.help": "Help",
   "profile.privacy": "Privacy",
   "profile.premiumPlan": "Premium Plan",
+  "profile.on": "On",
+  "profile.off": "Off",
   "auth.loginSubtitle": "Sign in to continue",
   "auth.registerTitle": "Create account",
   "auth.registerSubtitle": "Start playing today",

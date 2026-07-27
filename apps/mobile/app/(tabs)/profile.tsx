@@ -2,10 +2,27 @@ import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { User, Settings, CreditCard, LogOut, ChevronRight, Bell, HelpCircle, Shield } from 'lucide-react-native';
 import { useTranslation } from '../../i18n';
 import { useAuth } from '../../hooks/useAuth';
+import { useNotifications } from '../../hooks/useNotifications';
+import { useState } from 'react';
 
 export default function ProfileScreen() {
   const { t, locale, setLocale } = useTranslation();
   const { user, logout } = useAuth();
+  const { requestPermission, scheduleDailyReminder, cancelAll } = useNotifications();
+  const [notifEnabled, setNotifEnabled] = useState(true);
+
+  const toggleNotifications = async () => {
+    if (notifEnabled) {
+      await cancelAll();
+      setNotifEnabled(false);
+    } else {
+      const granted = await requestPermission();
+      if (granted) {
+        await scheduleDailyReminder(18, 0);
+        setNotifEnabled(true);
+      }
+    }
+  };
   return (
     <ScrollView style={styles.container}>
       <View style={styles.avatarSection}>
@@ -30,13 +47,18 @@ export default function ProfileScreen() {
           <Text style={styles.menuLabel}>{t('profile.settings')}</Text>
           <ChevronRight size={16} color="#6B7686" />
         </View>
-        <View style={styles.menuItem}>
+        <Pressable style={styles.menuItem} onPress={toggleNotifications}>
           <View style={[styles.menuIcon, { backgroundColor: 'rgba(56,189,248,.14)' }]}>
             <Bell size={16} color="#38BDF8" />
           </View>
-          <Text style={styles.menuLabel}>Notificaciones</Text>
+          <Text style={styles.menuLabel}>{t('profile.notifications')}</Text>
+          <View style={[styles.badge, { backgroundColor: notifEnabled ? 'rgba(34,197,94,.14)' : 'rgba(255,255,255,.06)' }]}>
+            <Text style={[styles.badgeText, { color: notifEnabled ? '#22C55E' : '#6B7686' }]}>
+              {notifEnabled ? t('profile.on') : t('profile.off')}
+            </Text>
+          </View>
           <ChevronRight size={16} color="#6B7686" />
-        </View>
+        </Pressable>
         <View style={styles.menuItem}>
           <View style={[styles.menuIcon, { backgroundColor: 'rgba(245,158,11,.16)' }]}>
             <CreditCard size={16} color="#FBBF24" />

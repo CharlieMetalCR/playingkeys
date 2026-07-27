@@ -2,10 +2,21 @@ import { Tabs, Redirect, Stack } from 'expo-router';
 import { LayoutGrid, Piano, LibraryBig, ChartNoAxesCombined, User, ShieldHalf, Users } from 'lucide-react-native';
 import { I18nProvider, useTranslation } from '../i18n';
 import { AuthProvider, useAuth } from '../hooks/useAuth';
+import { useNotifications } from '../hooks/useNotifications';
 import { ActivityIndicator, View } from 'react-native';
+import { useEffect } from 'react';
 
 function AuthGate() {
   const { user, loading } = useAuth();
+  const { requestPermission, scheduleDailyReminder } = useNotifications();
+
+  useEffect(() => {
+    if (user) {
+      requestPermission().then((granted) => {
+        if (granted) scheduleDailyReminder(18, 0);
+      });
+    }
+  }, [user]);
 
   if (loading) {
     return (
