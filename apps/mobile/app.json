@@ -14,6 +14,11 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0F17"
+    },
     "scheme": "playingkeys",
     "ios": {
       "supportsTablet": true,
@@ -26,7 +31,9 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.playingkeys.app"
+      "package": "com.playingkeys.app",
+      "jsEngine": "hermes",
+      "permissions": []
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -34,7 +41,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-av",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#7C3AED"
+        }
+      ]
     ]
   }
 }
