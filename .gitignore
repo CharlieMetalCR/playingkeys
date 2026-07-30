@@ -59,6 +59,13 @@ apps/api/prisma/migrations/
 .claude/
 .windsurf/
 
+# CodeGraph
+.codegraph/
+
+# Log files
+*.log
+api-eas.log
+
 # Temporary
 tmp/
 temp/

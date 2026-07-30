@@ -91,7 +91,7 @@ interface AdminStudentRow {
   idleDays?: number;
 }
 
-const API_BASE = "http://localhost:3001/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 const PIANO_KEYS: PianoKeyDef[] = [
   { note: "C4", label: "Do", type: "white", freq: 261.63, keyboardKey: "a" },
@@ -421,6 +421,60 @@ export default function AdminPage() {
       if (metroTimerRef.current) clearInterval(metroTimerRef.current);
     };
   }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginError("");
+    try {
+      await login(loginEmail, loginPassword);
+    } catch {
+      setLoginError(t("auth.error"));
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  if (authLoading) {
+    return <div className="app-shell" style={{ justifyContent: "center", alignItems: "center" }}><p style={{ color: "#9CA3AF" }}>{t("auth.loading")}</p></div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="app-shell" style={{ justifyContent: "center", alignItems: "center" }}>
+        <form onSubmit={handleLogin} style={{ background: "#1A2233", border: "1px solid #273244", borderRadius: 16, padding: 32, width: 360 }}>
+          <h2 style={{ color: "#F9FAFB", fontSize: 22, fontWeight: 700, marginBottom: 4, textAlign: "center" }}>PlayingKeys</h2>
+          <p style={{ color: "#9CA3AF", fontSize: 13, marginBottom: 24, textAlign: "center" }}>{t("auth.adminLogin")}</p>
+          {loginError && <p style={{ color: "#EF4444", fontSize: 13, marginBottom: 12 }}>{loginError}</p>}
+          <label style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>{t("auth.email")}</label>
+          <input
+            type="email"
+            value={loginEmail}
+            onChange={(e) => setLoginEmail(e.target.value)}
+            placeholder="admin@playingkeys.com"
+            style={{ width: "100%", background: "#111827", border: "1px solid #273244", borderRadius: 8, padding: "10px 12px", color: "#F9FAFB", fontSize: 14, marginTop: 6, marginBottom: 16, boxSizing: "border-box" as const }}
+            required
+          />
+          <label style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>{t("auth.password")}</label>
+          <input
+            type="password"
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            placeholder="••••••"
+            style={{ width: "100%", background: "#111827", border: "1px solid #273244", borderRadius: 8, padding: "10px 12px", color: "#F9FAFB", fontSize: 14, marginTop: 6, marginBottom: 20, boxSizing: "border-box" as const }}
+            required
+          />
+          <button
+            type="submit"
+            disabled={loginLoading}
+            style={{ width: "100%", background: "#7C3AED", border: "none", borderRadius: 999, padding: "12px 0", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", opacity: loginLoading ? 0.6 : 1 }}
+          >
+            {loginLoading ? "..." : t("auth.login")}
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   const meta = getViewMeta(t)[view];
   const barMax = Math.max(...WEEKS_DATA.map((w) => w.minutes));
@@ -779,61 +833,7 @@ export default function AdminPage() {
                 const IconComp = c.icon;
                 const unit = courseUnits[i];
                 const isExpanded = expandedUnitId === unit?.id;
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginLoading(true);
-    setLoginError("");
-    try {
-      await login(loginEmail, loginPassword);
-    } catch {
-      setLoginError(t("auth.error"));
-    } finally {
-      setLoginLoading(false);
-    }
-  };
-
-  if (authLoading) {
-    return <div className="app-shell" style={{ justifyContent: "center", alignItems: "center" }}><p style={{ color: "#9CA3AF" }}>{t("auth.loading")}</p></div>;
-  }
-
-  if (!user) {
-    return (
-      <div className="app-shell" style={{ justifyContent: "center", alignItems: "center" }}>
-        <form onSubmit={handleLogin} style={{ background: "#1A2233", border: "1px solid #273244", borderRadius: 16, padding: 32, width: 360 }}>
-          <h2 style={{ color: "#F9FAFB", fontSize: 22, fontWeight: 700, marginBottom: 4, textAlign: "center" }}>PlayingKeys</h2>
-          <p style={{ color: "#9CA3AF", fontSize: 13, marginBottom: 24, textAlign: "center" }}>{t("auth.adminLogin")}</p>
-          {loginError && <p style={{ color: "#EF4444", fontSize: 13, marginBottom: 12 }}>{loginError}</p>}
-          <label style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>{t("auth.email")}</label>
-          <input
-            type="email"
-            value={loginEmail}
-            onChange={(e) => setLoginEmail(e.target.value)}
-            placeholder="admin@playingkeys.com"
-            style={{ width: "100%", background: "#111827", border: "1px solid #273244", borderRadius: 8, padding: "10px 12px", color: "#F9FAFB", fontSize: 14, marginTop: 6, marginBottom: 16, boxSizing: "border-box" as const }}
-            required
-          />
-          <label style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>{t("auth.password")}</label>
-          <input
-            type="password"
-            value={loginPassword}
-            onChange={(e) => setLoginPassword(e.target.value)}
-            placeholder="••••••"
-            style={{ width: "100%", background: "#111827", border: "1px solid #273244", borderRadius: 8, padding: "10px 12px", color: "#F9FAFB", fontSize: 14, marginTop: 6, marginBottom: 20, boxSizing: "border-box" as const }}
-            required
-          />
-          <button
-            type="submit"
-            disabled={loginLoading}
-            style={{ width: "100%", background: "#7C3AED", border: "none", borderRadius: 999, padding: "12px 0", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", opacity: loginLoading ? 0.6 : 1 }}
-          >
-            {loginLoading ? "..." : t("auth.login")}
-          </button>
-        </form>
-      </div>
-    );
-  }
-
-  return (
+                return (
                   <article key={i} className="course-card">
                     <div className={`course-cover ${c.coverClass}`}>
                       <IconComp />

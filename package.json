@@ -12,9 +12,16 @@
     "dev:web": "cd apps/web && npm run dev",
     "dev:api": "cd apps/api && npm run start:dev",
     "build": "npm run build --workspaces",
+    "build:api": "cd apps/api && npm run build",
+    "build:web": "cd apps/web && npm run build",
+    "start:api": "cd apps/api && node dist/main",
+    "start:web": "cd apps/web && npm start",
     "test": "npm run test --workspaces",
     "type-check": "npm run type-check --workspaces",
-    "lint": "npm run lint --workspaces"
+    "lint": "npm run lint --workspaces",
+    "db:generate": "cd apps/api && npx prisma generate",
+    "db:migrate": "cd apps/api && npx prisma migrate deploy",
+    "db:seed": "cd apps/api && npx prisma db seed"
   },
   "engines": {
     "node": ">=18.0.0"

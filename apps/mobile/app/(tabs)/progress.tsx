@@ -2,9 +2,8 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-nat
 import { useState, useEffect, useCallback } from 'react';
 import { Award, Target, Flame, Star, AlertCircle, RefreshCw } from 'lucide-react-native';
 import { useTranslation } from '../../i18n';
+import { useAuth } from '../../hooks/useAuth';
 import { fetchStudentProgress, ApiProgress } from '../../lib/api';
-
-const DEMO_STUDENT_ID = '66397b72-6376-438c-8abd-08013af8d29b';
 
 const WEEKS = [
   { label: 'S1', values: [3, 5, 2, 6, 4, 1, 5] },
@@ -78,22 +77,24 @@ function computeHeatData(progress: ApiProgress[]): number[] {
 
 export default function ProgressScreen() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [progress, setProgress] = useState<ApiProgress[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    if (!user?.studentId) { setLoading(false); setError(t('progress.noData')); return; }
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchStudentProgress(DEMO_STUDENT_ID);
+      const data = await fetchStudentProgress(user.studentId);
       setProgress(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load progress');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user, t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -111,10 +112,10 @@ export default function ProgressScreen() {
       <View style={styles.center}>
         <AlertCircle size={40} color="#EF4444" />
         <Text style={styles.errorText}>{error}</Text>
-        <View style={styles.retryBtn}>
+          <Pressable style={styles.retryBtn} onPress={load}>
           <RefreshCw size={16} color="#fff" />
-          <Text style={styles.retryText} onPress={load}>{t('courses.retry')}</Text>
-        </View>
+          <Text style={styles.retryText}>{t('courses.retry')}</Text>
+        </Pressable>
       </View>
     );
   }

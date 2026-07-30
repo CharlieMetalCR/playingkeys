@@ -5,7 +5,7 @@ import { useTranslation } from "../../i18n";
 import { useWebAuth } from "../../hooks/useWebAuth";
 import { Users, BookOpen, TrendingUp, Search, Menu, Bell, Flame, Settings2, PanelLeftClose, LogOut, User, ShieldHalf } from "lucide-react";
 
-const API_BASE = "http://localhost:3001/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 interface StudentRow {
   id: string;

@@ -3,8 +3,7 @@ import { useEffect, useState } from 'react';
 import { Users, LibraryBig, CreditCard, ChevronRight } from 'lucide-react-native';
 import { useTranslation } from '../../i18n';
 import { useAuth } from '../../hooks/useAuth';
-
-const API_URL = 'http://10.0.2.2:3001/api';
+import { API_URL } from '../../lib/api';
 
 interface AdminStat {
   label: string;

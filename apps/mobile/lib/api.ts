@@ -1,16 +1,11 @@
-import { Platform } from 'react-native';
-
-const API_URL = Platform.select({
-  android: 'http://10.0.2.2:3001/api',
-  ios: 'http://localhost:3001/api',
-  default: 'http://localhost:3001/api',
-});
+import { API_URL } from '../constants/config';
 
 export interface AuthUser {
   id: string;
   email: string;
   name: string;
   role: string;
+  studentId?: string;
 }
 
 export interface AuthResponse {
@@ -44,7 +39,7 @@ export async function authProfile(token: string): Promise<AuthUser> {
   });
   if (!res.ok) throw new Error(`Profile fetch failed: ${res.status}`);
   const data = await res.json();
-  return { id: data.id, email: data.email, name: data.name, role: data.role };
+  return { id: data.id, email: data.email, name: data.name, role: data.role, studentId: data.student?.id };
 }
 
 export interface ApiUnit {
@@ -127,4 +122,51 @@ export async function createProgress(data: {
 
 export async function fetchStudentProgress(studentId: string): Promise<ApiProgress[]> {
   return apiFetch<ApiProgress[]>(`/progress/student/${studentId}`);
+}
+
+export interface StudentStats {
+  completedLessons: number;
+  totalLessons: number;
+  streak: number;
+  avgScore: number;
+}
+
+export async function fetchStudentStats(studentId: string, token?: string): Promise<StudentStats> {
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const [progress, units] = await Promise.all([
+    apiFetch<ApiProgress[]>(`/progress/student/${studentId}`),
+    apiFetch<(ApiUnit & { lessons: { id: string }[] })[]>('/units'),
+  ]);
+
+  const completed = progress.filter((p) => p.status === 'COMPLETED');
+  const totalLessons = units.reduce((sum, u) => sum + (u.lessons?.length ?? 0), 0);
+
+  const scores = completed.filter((p) => p.score != null).map((p) => p.score!);
+  const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+
+  const completedDates = completed
+    .filter((p) => p.completedAt)
+    .map((p) => new Date(p.completedAt!).toDateString())
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+  let streak = 0;
+  if (completedDates.length > 0) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let checkDate = new Date(today);
+    for (const dateStr of completedDates) {
+      const d = new Date(dateStr);
+      d.setHours(0, 0, 0, 0);
+      if (d.getTime() === checkDate.getTime()) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else if (d.getTime() < checkDate.getTime()) {
+        break;
+      }
+    }
+  }
+
+  return { completedLessons: completed.length, totalLessons, streak, avgScore };
 }

@@ -1,7 +1,14 @@
 {
   "expo": {
+    "owner": "playingkeyss-team",
     "name": "PlayingKeys",
     "slug": "playingkeys",
+    "extra": {
+      "eas": {
+        "projectId": "6fa674f2-b50b-4ed7-ad5f-de4dfd58b8c7"
+      },
+      "apiUrl": "http://192.168.1.6:3001/api"
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -26,7 +33,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-dev-client"
     ]
   }
 }
