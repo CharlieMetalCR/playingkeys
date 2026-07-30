@@ -1,9 +1,0 @@
-[build]
-cmds = ["npx prisma generate && npm run build"]
-
-[release]
-cmd = "npx prisma migrate deploy"
-
-[start]
-cmd = "npm run start:prod"
-
