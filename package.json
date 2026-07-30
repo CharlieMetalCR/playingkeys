@@ -24,7 +24,7 @@
     "db:seed": "cd apps/api && npx prisma db seed"
   },
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   },
   "packageManager": "npm@9.0.0"
 }
