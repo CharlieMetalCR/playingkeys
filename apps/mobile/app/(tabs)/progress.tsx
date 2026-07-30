@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { Award, Target, Flame, Star, AlertCircle, RefreshCw } from 'lucide-react-native';
 import { useTranslation } from '../../i18n';

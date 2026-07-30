@@ -1,4 +1,5 @@
 import { API_URL } from '../constants/config';
+export { API_URL };
 
 export interface AuthUser {
   id: string;
