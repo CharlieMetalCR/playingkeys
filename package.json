@@ -23,6 +23,11 @@
     "db:migrate": "cd apps/api && npx prisma migrate deploy",
     "db:seed": "cd apps/api && npx prisma db seed"
   },
+  "overrides": {
+    "react-native-gesture-handler": "2.32.0",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-svg": "15.15.4"
+  },
   "engines": {
     "node": "22.x"
   },
