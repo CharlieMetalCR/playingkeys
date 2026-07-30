@@ -8,6 +8,8 @@
     "numReplicas": 1,
     "startCommand": "npm run start:prod",
     "healthcheckPath": "/api/health",
-    "restartPolicyType": "ON_FAILURE"
+    "restartPolicyType": "ON_FAILURE",
+    "releaseCommand": "npx prisma migrate deploy"
   }
 }
+
