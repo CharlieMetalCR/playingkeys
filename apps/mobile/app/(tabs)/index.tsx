@@ -1,9 +1,28 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { Flame, BookOpen, Clock, Zap, Music, ChevronRight } from 'lucide-react-native';
 import { useTranslation } from '../../i18n';
+import { useAuth } from '../../hooks/useAuth';
+import { useEffect, useState } from 'react';
+import { fetchStudentStats, StudentStats } from '../../lib/api';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const { user, token } = useAuth();
+  const [stats, setStats] = useState<StudentStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.studentId) { setLoading(false); return; }
+    fetchStudentStats(user.studentId, token ?? undefined)
+      .then(setStats)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [user, token]);
+
+  const completed = stats?.completedLessons ?? 0;
+  const totalLessons = stats?.totalLessons ?? 0;
+  const streak = stats?.streak ?? 0;
+  const avgScore = stats?.avgScore ?? 0;
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.greetingRow}>
@@ -13,7 +32,7 @@ export default function HomeScreen() {
         </View>
         <View style={styles.streakChip}>
           <Flame size={14} color="#FBBF24" />
-          <Text style={styles.streakText}>{t('home.streak', { count: 7 })}</Text>
+          <Text style={styles.streakText}>{t('home.streak', { count: streak })}</Text>
         </View>
       </View>
 
@@ -42,28 +61,28 @@ export default function HomeScreen() {
           <View style={[styles.statIcon, { backgroundColor: 'rgba(124,58,237,.16)' }]}>
             <BookOpen size={18} color="#C4B5FD" />
           </View>
-          <Text style={styles.statValue}>12</Text>
+          <Text style={styles.statValue}>{completed}</Text>
           <Text style={styles.statLabel}>{t('home.coursesCompleted')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(56,189,248,.14)' }]}>
             <Music size={18} color="#38BDF8" />
           </View>
-          <Text style={styles.statValue}>48</Text>
+          <Text style={styles.statValue}>{totalLessons}</Text>
           <Text style={styles.statLabel}>{t('home.lessons')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(34,197,94,.14)' }]}>
             <Clock size={18} color="#22C55E" />
           </View>
-          <Text style={styles.statValue}>24h</Text>
+          <Text style={styles.statValue}>{avgScore}%</Text>
           <Text style={styles.statLabel}>{t('home.totalTime')}</Text>
         </View>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: 'rgba(245,158,11,.16)' }]}>
             <Zap size={18} color="#FBBF24" />
           </View>
-          <Text style={styles.statValue}>7</Text>
+          <Text style={styles.statValue}>{streak}</Text>
           <Text style={styles.statLabel}>{t('home.streakLabel')}</Text>
         </View>
       </View>
