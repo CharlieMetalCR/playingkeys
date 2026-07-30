@@ -1,13 +1,14 @@
 {
   "expo": {
-    "owner": "playingkeyss-team",
+    "owner": "fria",
     "name": "PlayingKeys",
     "slug": "playingkeys",
     "extra": {
+      "apiUrl": "https://api-production-474a.up.railway.app/api",
+      "router": {},
       "eas": {
         "projectId": "6fa674f2-b50b-4ed7-ad5f-de4dfd58b8c7"
-      },
-      "apiUrl": "https://api-production-474a.up.railway.app/api"
+      }
     },
     "version": "1.0.0",
     "orientation": "portrait",
