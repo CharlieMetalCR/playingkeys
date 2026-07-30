@@ -54,6 +54,11 @@ ios/
 # Prisma
 apps/api/prisma/migrations/
 
+# Agent/IDE skill files (not needed for builds)
+.agents/
+.claude/
+.windsurf/
+
 # Temporary
 tmp/
 temp/
