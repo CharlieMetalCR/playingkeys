@@ -6,15 +6,15 @@
 
 ## Resumen Ejecutivo
 
-PlayingKeys es una plataforma completa para aprender piano, diseñada para escuelas de música, profesores independientes y estudiantes autodidactas. Incluye una **app móvil** (Android + iOS), un **panel web para administradores y profesores**, y un **backend robusto** con base de datos PostgreSQL.
+PlayingKeys es una plataforma completa para aprender piano, diseñada para escuelas de música, profesores independientes y estudiantes autodidactas. Incluye una **app móvil** (Android), un **panel web para administradores y profesores**, y un **backend robusto** con base de datos PostgreSQL.
 
 **Modelo de pago propuesto:**
 - **Pago inicial:** $300 (para iniciar el proyecto)
-- **5 pagos mensuales de $120:** $600
-- **Total:** $900
+- **6 pagos mensuales de $120:** $720
+- **Total:** $1,020
 - **Tiempo de desarrollo:** 1 mes
 - **Soporte post-entrega:** 15 días adicionales
-- **A cargo del cliente:** dominio, hosting, publicación en App Store/Play Store ($99/año Apple, $25 único Google)
+- **A cargo del cliente:** dominio, hosting, publicación en Google Play Store ($25 único)
 
 > El desarrollo se completa en el primer mes + 15 días de soporte. Los pagos restantes son por comodidad, no porque se requiera trabajo adicional.
 
@@ -107,12 +107,12 @@ Relaciones: Usuarios con roles, estudiantes asignados a profesores, progreso por
 
 | Concepto | Mercado CR (agencia) | Nuestra propuesta |
 |----------|---------------------|-------------------|
-| Desarrollo | $15,000 - $58,000 | $900 |
+| Desarrollo | $15,000 - $58,000 | $1,020 |
 | Tiempo de entrega | 3-5 meses | 1 mes + 15 días soporte |
 | Pago inicial | 40-50% ($6,000-$29,000) | $300 |
-| Cuotas mensuales | N/A | 5 cuotas de $120 |
+| Cuotas mensuales | N/A | 6 cuotas de $120 |
 | Dominio/hosting | Cliente (~$150-300/año) | Cliente |
-| Publicación stores | Cliente ($124/año) | Cliente |
+| Publicación stores | Cliente ($25 único) | Cliente |
 | Mantenimiento mensual | $1,000 - $5,400/mes | No requerido |
 
 > **Ahorro para el cliente:** 94-98% vs agencia tradicional en CR
@@ -131,7 +131,8 @@ Relaciones: Usuarios con roles, estudiantes asignados a profesores, progreso por
 | **Pago 4** | **$120** | Mes 4 |
 | **Pago 5** | **$120** | Mes 5 |
 | **Pago 6** | **$120** | Mes 6 |
-| **Total** | **$900** | |
+| **Pago 7** | **$120** | Mes 7 |
+| **Total** | **$1,020** | |
 
 ### Cronograma
 
@@ -153,9 +154,8 @@ Semana 7-8: Soporte post-entrega (bugs menores)
 |----------|----------------------|
 | Dominio (.com) | $12 - $30/año |
 | Hosting (API + BD) | $150 - $300/año |
-| Apple Developer Program | $99/año |
 | Google Play Developer | $25 (único) |
-| **Total cliente** | **~$286 - $454/año** |
+| **Total cliente** | **~$187 - $355/año** |
 
 ---
 
@@ -163,7 +163,7 @@ Semana 7-8: Soporte post-entrega (bugs menores)
 
 ### Vs Agencia Tradicional en Costa Rica
 
-| Factor | Agencia ($15K-58K) | Esta propuesta ($900) |
+| Factor | Agencia ($15K-58K) | Esta propuesta ($1,020) |
 |--------|-------------------|----------------------|
 | Inversión inicial | $6,000 - $29,000 | $300 |
 | Tiempo de desarrollo | 3-5 meses | 1 mes |
@@ -173,25 +173,12 @@ Semana 7-8: Soporte post-entrega (bugs menores)
 
 ### Vs Contratar Freelancer Individual
 
-| Factor | Freelancer ($5K-15K) | Esta propuesta ($900) |
+| Factor | Freelancer ($5K-15K) | Esta propuesta ($1,020) |
 |--------|---------------------|----------------------|
 | Confiabilidad | Variable (riesgo de abandono) | Alta (desarrollador verificado) |
 | Stack técnico | Limitado | Completo (React Native, NestJS, Prisma, Next.js) |
 | Entrega | Incierta | Fecha fija |
 | Código fuente | Negociable | 100% del cliente |
-
-### Modelo de Ingreso Potencial para el Cliente
-
-PlayingKeys como negocio genera ingresos recurrentes:
-
-| Fuente de ingreso | Ejemplo | Ingreso mensual potencial |
-|-------------------|---------|--------------------------|
-| Suscripción estudiante | $15/mes | 50 estudiantes = $750/mes |
-| Suscripción premium | $25/mes | 20 estudiantes = $500/mes |
-| Escuelas de música | $50/mes por sede | 5 sedes = $250/mes |
-| Clases particulares | $30/hora | 10 horas/semana = $1,200/mes |
-
-> **ROI:** Con solo **2 estudiantes** suscriptores se recupera la inversión total en **3 meses**.
 
 ---
 
@@ -199,9 +186,9 @@ PlayingKeys como negocio genera ingresos recurrentes:
 
 | Capa | Tecnología | Beneficio |
 |------|-----------|-----------|
-| **App Móvil** | React Native + Expo SDK 57 | iOS + Android con un solo código base, despliegue OTA (EAS Update) |
+| **App Móvil** | React Native + Expo SDK 57 | Android, despliegue OTA (EAS Update) |
 | **Backend** | NestJS + TypeScript | Arquitectura modular, OpenAPI, escalable |
-| **Base de Datos** | PostgreSQL + Prisma | ORM类型安全, migraciones, relaciones complejas |
+| **Base de Datos** | PostgreSQL + Prisma | ORM, migraciones, relaciones complejas |
 | **Panel Web** | Next.js 14 + Tailwind | Admin dashboard, server components |
 | **Audio** | expo-av + Web Audio API | Piano samples reales, grabación, análisis de tono |
 | **Autenticación** | JWT + Passport | Seguro, stateless, roles |
@@ -214,7 +201,7 @@ PlayingKeys como negocio genera ingresos recurrentes:
 ## Entregables
 
 1. **Código fuente completo** (repo privado del cliente)
-2. **App móvil** compilable para Android + iOS (APK/IPA)
+2. **App móvil** compilable para Android (APK)
 3. **Panel web** administrador + profesor
 4. **API documentada** con Swagger/OpenAPI
 5. **Base de datos** con seed de datos de prueba
@@ -232,11 +219,5 @@ PlayingKeys como negocio genera ingresos recurrentes:
 - **Confidencialidad** total sobre el código y datos del proyecto
 
 ---
-
-## Contacto
-
-**Desarrollador:** [Nombre]
-**Email:** [email]
-**WhatsApp:** [teléfono]
 
 > Propuesta válida por 15 días a partir de: **Julio 2026**
